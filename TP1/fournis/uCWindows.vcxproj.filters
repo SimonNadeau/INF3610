@@ -48,7 +48,7 @@
     <ClCompile Include="os_trace.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="exo1.c">
+    <ClCompile Include="exo2.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
