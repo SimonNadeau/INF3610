@@ -5,8 +5,8 @@
 *                                               PORT Windows
 *
 *
-*                                     Arnaud Desault, Frédéric Fortier
-*                                  École Polytechnique de Montreal, QC, CANADA
+*                                     Arnaud Desault, Frï¿½dï¿½ric Fortier
+*                                  ï¿½cole Polytechnique de Montreal, QC, CANADA
 *                                                  01/2018
 *
 * File : exo1.c
@@ -14,7 +14,7 @@
 *********************************************************************************************************
 */
 
-// Main include of µC-II
+// Main include of ï¿½C-II
 #include "includes.h"
 
 /*
@@ -30,12 +30,6 @@
 #define TASK3_PRIO   		7
 #define TASK4_PRIO   		8
 #define TASK5_PRIO   		9
-
-#define TASK1_ID    		1                // Defining Id of each task
-#define TASK2_ID    		2
-#define TASK3_ID    		3
-#define TASK4_ID    		4
-#define TASK5_ID    		5
 
 /*
 *********************************************************************************************************
@@ -59,7 +53,7 @@ void    Task2(void *data);
 void    Task3(void *data);
 void    Task4(void *data);
 void    Task5(void *data);
-void	errorMessage(INT8U err, INT8U taskID);
+void	errMsg(INT8U err, char* errMsg);
 
 /*
 *********************************************************************************************************
@@ -69,15 +63,21 @@ void	errorMessage(INT8U err, INT8U taskID);
 
 void main(void)
 {
-	// à compléter
+	// ï¿½ complï¿½ter
+	INT8U err;
 
 	OSInit();
 
-	errorMessage(OSTaskCreate(Task2, (void*)0, &Task2Stk[TASK_STK_SIZE - 1], TASK2_PRIO), TASK2_ID);
-	errorMessage(OSTaskCreate(Task1, (void*)0, &Task1Stk[TASK_STK_SIZE - 1], TASK1_PRIO), TASK1_ID);
-	errorMessage(OSTaskCreate(Task3, (void*)0, &Task3Stk[TASK_STK_SIZE - 1], TASK3_PRIO), TASK3_ID);
-	errorMessage(OSTaskCreate(Task4, (void*)0, &Task4Stk[TASK_STK_SIZE - 1], TASK4_PRIO), TASK4_ID);
-	errorMessage(OSTaskCreate(Task5, (void*)0, &Task5Stk[TASK_STK_SIZE - 1], TASK5_PRIO), TASK5_ID);
+	err = OSTaskCreate(Task1, (void*)0, &Task1Stk[TASK_STK_SIZE - 1], TASK1_PRIO);
+	errMsg(err, "Erreur dans la tache 1\n");	
+	err = OSTaskCreate(Task2, (void*)0, &Task2Stk[TASK_STK_SIZE - 1], TASK2_PRIO);
+	errMsg(err, "Erreur dans la tache 2\n");	
+	err = OSTaskCreate(Task3, (void*)0, &Task3Stk[TASK_STK_SIZE - 1], TASK3_PRIO);
+	errMsg(err, "Erreur dans la tache 3\n");	
+	err = OSTaskCreate(Task4, (void*)0, &Task4Stk[TASK_STK_SIZE - 1], TASK4_PRIO);
+	errMsg(err, "Erreur dans la tache 4\n");
+	err = OSTaskCreate(Task5, (void*)0, &Task5Stk[TASK_STK_SIZE - 1], TASK5_PRIO);
+	errMsg(err, "Erreur dans la tache 5\n");
 	
 	OSStart();
 
@@ -141,10 +141,11 @@ void Task5(void* data)
 *********************************************************************************************************
 */
 
-void errorMessage(INT8U err, INT8U taskID)
+void errMsg(INT8U err, char* errMsg)
 {
-	if (err != OS_NO_ERR)
+	if (err != OS_ERR_NONE)
 	{
-		printf("Erreur dans la tâche %d\n", taskID);
+		printf(errMsg);
+		exit(1);
 	}
 }

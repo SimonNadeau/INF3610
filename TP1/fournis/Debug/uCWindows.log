@@ -1,0 +1,3 @@
+﻿  exo1.c
+exo1.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/SAFESEH' specification
+  uCWindows.vcxproj -> C:\Users\snad9\OneDrive\Documents\Polytechnique\Cours\A18\INF3610\TP\INF3610\TP1\fournis\.\Debug\uCWindows.exe
