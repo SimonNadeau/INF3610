@@ -1,0 +1,4 @@
+*.obj
+*.tlog
+TP1/.vs/*
+TP1/fournis/Debug/*
