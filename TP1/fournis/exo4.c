@@ -22,11 +22,13 @@
 *********************************************************************************************************
 */
 
-#define TASK_STK_SIZE       16384            // Size of each task's stacks (# of WORDs)
+#define TASK_STK_SIZE			16384            // Size of each task's stacks (# of WORDs)
 
-#define ROBOT_A_PRIO   		8				 // Defining Priority of each task
-#define ROBOT_B_PRIO   		9
-#define CONTROLLER_PRIO     22
+#define ROBOT_A_PRIO   			8				 // Defining Priority of each task
+#define ROBOT_B_PRIO   			9
+#define CONTROLLER_PRIO			7
+#define MUTEX_ITEM_COUNT_PRIO	6
+
 
 /*
 *********************************************************************************************************
@@ -36,7 +38,6 @@
 
 OS_STK           prepRobotAStk[TASK_STK_SIZE];	//Stack of each task
 OS_STK           prepRobotBStk[TASK_STK_SIZE];
-OS_STK           transportStk[TASK_STK_SIZE];
 OS_STK           controllerStk[TASK_STK_SIZE];
 
 /*
@@ -45,6 +46,11 @@ OS_STK           controllerStk[TASK_STK_SIZE];
 *********************************************************************************************************
 */
 volatile int total_item_count = 0;
+
+OS_EVENT* mutex_item_count;
+OS_EVENT* RobotA_Queue;
+OS_EVENT* RobotB_Queue;
+
 /*
 *********************************************************************************************************
 *                                         FUNCTION PROTOTYPES
@@ -77,8 +83,23 @@ typedef struct work_data {
 void main(void)
 {
 	UBYTE err;
+	void *RobotAMsg[10];
+	void *RobotBMsg[10];
 
 	// A completer
+
+	OSInit();
+
+	RobotA_Queue = OSQCreate(&RobotAMsg[0], 10);
+	RobotB_Queue = OSQCreate(&RobotBMsg[0], 10);
+
+	mutex_item_count = OSMutexCreate(MUTEX_ITEM_COUNT_PRIO, &err);
+
+	errMsg(OSTaskCreate(controller, (void*)0, &controllerStk[TASK_STK_SIZE - 1], CONTROLLER_PRIO), "Erreur Controller");
+	errMsg(OSTaskCreate(robotA, (void*)0, &prepRobotAStk[TASK_STK_SIZE - 1], ROBOT_A_PRIO), "Erreur Robot A");
+	errMsg(OSTaskCreate(robotB, (void*)0, &prepRobotBStk[TASK_STK_SIZE - 1], ROBOT_B_PRIO), "Erreur Robot B");
+
+	OSStart();
 
 	return;
 }
@@ -100,6 +121,15 @@ void robotA(void* data)
 	while (1)
 	{
 		// A completer
+		itemCountRobotA = *(int*)OSQPend(RobotA_Queue, 0, &err);
+		errMsg(err, "Error while trying to access RobotA_Queue");
+
+		OSMutexPend(mutex_item_count, 0, &err);
+		errMsg(err, "Error while trying to access mutex_item_count");
+		writeCurrentTotalItemCount(readCurrentTotalItemCount() + itemCountRobotA);
+		err = OSMutexPost(mutex_item_count);
+		errMsg(err, "Error while trying to post mutex_item_count");
+
 
 		int counter = 0;
 		while (counter < itemCountRobotA * 1000) { counter++; }
@@ -119,6 +149,14 @@ void robotB(void* data)
 	while (1)
 	{
 		// A completer
+		itemCountRobotB = *(int*)OSQPend(RobotB_Queue, 0, &err);
+		errMsg(err, "Error while trying to access RobotB_Queue");
+
+		OSMutexPend(mutex_item_count, 0, &err);
+		errMsg(err, "Error while trying to access mutex_item_count");
+		writeCurrentTotalItemCount(readCurrentTotalItemCount() + itemCountRobotB);
+		err = OSMutexPost(mutex_item_count);
+		errMsg(err, "Error while trying to post mutex_item_count");
 
 		int counter = 0;
 		while (counter < itemCountRobotB * 1000) { counter++; }
@@ -147,11 +185,18 @@ void controller(void* data)
 		printf("TACHE CONTROLLER @ %d : COMMANDE #%d. \n prep time A = %d, prep time B = %d\n", OSTimeGet() - startTime, i, workData->work_data_a, workData->work_data_b);
 		
 		// A completer
+		err = OSQPost(RobotA_Queue, (void *)&(workData->work_data_a));
+		errMsg(err, "Erreur Robot A Post Queue");
+
+		err = OSQPost(RobotB_Queue, (void *)&(workData->work_data_b));
+		errMsg(err, "Erreur Robot B Post Queue");
 
 		// Délai aléatoire avant nouvelle commande
 		randomTime = (rand() % 9 + 5) * 4;
 		OSTimeDly(randomTime);
 	}
+
+	free(workData);
 }
 
 int	readCurrentTotalItemCount()
