@@ -118,11 +118,17 @@ void robotA(void* data)
 
 	printf("ROBOT A @ %d : DEBUT.\n", OSTimeGet() - startTime);
 	int itemCountRobotA;
+	work_data* wd;
 	while (1)
 	{
 		// A completer
-		itemCountRobotA = *(int*)OSQPend(RobotA_Queue, 0, &err);
+		wd = OSQPend(RobotA_Queue, 0, &err);
 		errMsg(err, "Error while trying to access RobotA_Queue");
+
+		err = OSQPost(RobotB_Queue, &(wd->work_data_b));
+		errMsg(err, "Erreur Robot B Post Queue");
+
+		itemCountRobotA = wd->work_data_a;
 
 		OSMutexPend(mutex_item_count, 0, &err);
 		errMsg(err, "Error while trying to access mutex_item_count");
@@ -185,12 +191,12 @@ void controller(void* data)
 		printf("TACHE CONTROLLER @ %d : COMMANDE #%d. \n prep time A = %d, prep time B = %d\n", OSTimeGet() - startTime, i, workData->work_data_a, workData->work_data_b);
 		
 		// A completer
-		err = OSQPost(RobotA_Queue, (void *)&(workData->work_data_a));
+		err = OSQPost(RobotA_Queue, workData);
 		errMsg(err, "Erreur Robot A Post Queue");
-
+/*
 		err = OSQPost(RobotB_Queue, (void *)&(workData->work_data_b));
 		errMsg(err, "Erreur Robot B Post Queue");
-
+*/
 		// Délai aléatoire avant nouvelle commande
 		randomTime = (rand() % 9 + 5) * 4;
 		OSTimeDly(randomTime);

@@ -1,4 +1,2 @@
 ﻿  exo4.c
-  LINK : .\Debug\uCWindows.exe introuvable ou non généré par la dernière édition de liens incrémentielle ; édition de liens complète en cours
-exo4.obj : warning LNK4075: ' /EDITANDCONTINUE' ignoré à cause de la spécification '/SAFESEH'
   uCWindows.vcxproj -> X:\Documents\Session5\INF3610\TP1\fournis\.\Debug\uCWindows.exe
