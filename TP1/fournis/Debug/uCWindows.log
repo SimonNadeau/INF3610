@@ -1,10 +1,2 @@
-﻿  exo6.c
-c:\users\snad9\onedrive\documents\polytechnique\cours\a18\inf3610\tp\inf3610\tp1\fournis\exo6.c(132): warning C4477: 'printf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type 'void *'
-c:\users\snad9\onedrive\documents\polytechnique\cours\a18\inf3610\tp\inf3610\tp1\fournis\exo6.c(139): error C2198: 'OSQAccept': too few arguments for call
-c:\users\snad9\onedrive\documents\polytechnique\cours\a18\inf3610\tp\inf3610\tp1\fournis\exo6.c(143): warning C4477: 'printf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type 'void *'
-c:\users\snad9\onedrive\documents\polytechnique\cours\a18\inf3610\tp\inf3610\tp1\fournis\exo6.c(171): warning C4477: 'printf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type 'void *'
-c:\users\snad9\onedrive\documents\polytechnique\cours\a18\inf3610\tp\inf3610\tp1\fournis\exo6.c(184): warning C4477: 'printf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type 'void *'
-c:\users\snad9\onedrive\documents\polytechnique\cours\a18\inf3610\tp\inf3610\tp1\fournis\exo6.c(191): warning C4020: 'OSQAccept': too many actual parameters
-c:\users\snad9\onedrive\documents\polytechnique\cours\a18\inf3610\tp\inf3610\tp1\fournis\exo6.c(195): warning C4020: 'OSQAccept': too many actual parameters
-c:\users\snad9\onedrive\documents\polytechnique\cours\a18\inf3610\tp\inf3610\tp1\fournis\exo6.c(204): warning C4477: 'printf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type 'void *'
-c:\users\snad9\onedrive\documents\polytechnique\cours\a18\inf3610\tp\inf3610\tp1\fournis\exo6.c(216): warning C4477: 'printf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type 'void *'
+﻿  exo3.c
+  uCWindows.vcxproj -> C:\Users\machaci\Documents\INF3610\TP1\fournis\.\Debug\uCWindows.exe

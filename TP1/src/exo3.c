@@ -52,6 +52,7 @@ OS_STK           controllerStk[TASK_STK_SIZE];
 OS_FLAG_GRP *FlagRobot;
 OS_EVENT* mutex_item_count;
 volatile int total_item_count = 0;
+int nbr_command = 0;
 
 /*
 *********************************************************************************************************
@@ -108,11 +109,13 @@ void robotA(void* data)
 		itemCount = (rand() % 7 + 1) * 10;
 
 		// A completer
+		nbr_command--;
 		OSFlagPend(FlagRobot, FLAG_A, OS_FLAG_WAIT_SET_ALL, 0, &err);
 		errMsg(err, "Error while trying to access Flag Robot A");
 		OSFlagPost(FlagRobot, FLAG_A, OS_FLAG_CLR, &err);
 		errMsg(err, "Error while trying to desactivate Flag Robot A");
 
+		nbr_command++;
 		OSFlagPost(FlagRobot, FLAG_B, OS_FLAG_SET, &err);
 		errMsg(err, "Error while trying to post Flag Robot B");
 
@@ -142,6 +145,7 @@ void robotB(void* data)
 		itemCount = (rand() % 6 + 2) * 10;
 
 		// A completer
+		nbr_command--;
 		OSFlagPend(FlagRobot, FLAG_B, OS_FLAG_WAIT_SET_ALL, 0, &err);
 		errMsg(err, "Error while trying to access Flag Robot B");
 		OSFlagPost(FlagRobot, FLAG_B, OS_FLAG_CLR, &err);
@@ -176,9 +180,13 @@ void controller(void* data)
 		printf("CONTROLLER @ %d : COMMANDE #%d. \n", OSTimeGet() - startTime, i);
 
 		// A completer
+		nbr_command++;
 		OSFlagPost(FlagRobot, FLAG_A, OS_FLAG_SET, &err);
 		errMsg(err, "Error while trying to post flag for Robot A");
 	}
+	OSTimeDly(10);
+	printf("FIN @ %d\n", nbr_command);
+
 }
 
 int	readCurrentTotalItemCount()
