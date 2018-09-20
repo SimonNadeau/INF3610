@@ -1,2 +1,4 @@
-﻿  exo4.c
-  uCWindows.vcxproj -> X:\Documents\Session5\INF3610\TP1\fournis\.\Debug\uCWindows.exe
+﻿  exo5.c
+c:\users\machaci\documents\inf3610\fournis\exo5.c(140): warning C4047: '=' : les niveaux d'indirection de 'INT16U' et de 'void *' sont différents
+c:\users\machaci\documents\inf3610\fournis\exo5.c(201): warning C4047: '=' : les niveaux d'indirection de 'INT16U' et de 'void *' sont différents
+  uCWindows.vcxproj -> C:\Users\machaci\Documents\INF3610\fournis\.\Debug\uCWindows.exe

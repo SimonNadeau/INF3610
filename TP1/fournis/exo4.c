@@ -48,9 +48,7 @@ OS_STK           controllerStk[TASK_STK_SIZE];
 volatile int total_item_count = 0;
 
 OS_EVENT* mutex_item_count;
-OS_EVENT* RobotA_Queue;
-OS_EVENT* RobotB_Queue;
-
+OS_EVENT* Robot_Queue;
 /*
 *********************************************************************************************************
 *                                         FUNCTION PROTOTYPES
@@ -83,15 +81,13 @@ typedef struct work_data {
 void main(void)
 {
 	UBYTE err;
-	void *RobotAMsg[10];
-	void *RobotBMsg[10];
+	void *RobotMsg[10];
 
 	// A completer
 
 	OSInit();
 
-	RobotA_Queue = OSQCreate(&RobotAMsg[0], 10);
-	RobotB_Queue = OSQCreate(&RobotBMsg[0], 10);
+	Robot_Queue = OSQCreate(&RobotMsg[0], 10);
 
 	mutex_item_count = OSMutexCreate(MUTEX_ITEM_COUNT_PRIO, &err);
 
@@ -122,10 +118,10 @@ void robotA(void* data)
 	while (1)
 	{
 		// A completer
-		wd = OSQPend(RobotA_Queue, 0, &err);
+		wd = OSQPend(Robot_Queue, 0, &err);
 		errMsg(err, "Error while trying to access RobotA_Queue");
 
-		err = OSQPost(RobotB_Queue, &(wd->work_data_b));
+		err = OSQPost(Robot_Queue, &(wd->work_data_b));
 		errMsg(err, "Erreur Robot B Post Queue");
 
 		itemCountRobotA = wd->work_data_a;
@@ -155,7 +151,7 @@ void robotB(void* data)
 	while (1)
 	{
 		// A completer
-		itemCountRobotB = *(int*)OSQPend(RobotB_Queue, 0, &err);
+		itemCountRobotB = *(int*)OSQPend(Robot_Queue, 0, &err);
 		errMsg(err, "Error while trying to access RobotB_Queue");
 
 		OSMutexPend(mutex_item_count, 0, &err);
@@ -191,12 +187,9 @@ void controller(void* data)
 		printf("TACHE CONTROLLER @ %d : COMMANDE #%d. \n prep time A = %d, prep time B = %d\n", OSTimeGet() - startTime, i, workData->work_data_a, workData->work_data_b);
 		
 		// A completer
-		err = OSQPost(RobotA_Queue, workData);
+		err = OSQPost(Robot_Queue, workData);
 		errMsg(err, "Erreur Robot A Post Queue");
-/*
-		err = OSQPost(RobotB_Queue, (void *)&(workData->work_data_b));
-		errMsg(err, "Erreur Robot B Post Queue");
-*/
+
 		// Délai aléatoire avant nouvelle commande
 		randomTime = (rand() % 9 + 5) * 4;
 		OSTimeDly(randomTime);
