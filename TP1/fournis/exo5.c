@@ -9,12 +9,12 @@
 *                                  Ecole Polytechnique de Montreal, Qc, CANADA
 *                                                  01/2018
 *
-* File : exo5.c
+* File : exo4.c
 *
 *********************************************************************************************************
 */
 
-// Main include of µC-II
+// Main include of ï¿½C-II
 #include "includes.h"
 /*
 *********************************************************************************************************
@@ -30,7 +30,6 @@
 #define ROBOT_B2_PRIO   		11
 #define CONTROLLER_PRIO			7
 #define MUTEX_ITEM_COUNT_PRIO	6
-#define MUTEX_DONE_PRIO			22
 
 /*
 *********************************************************************************************************
@@ -52,11 +51,11 @@ OS_STK           controllerStk[TASK_STK_SIZE];
 volatile int total_item_count = 0;
 
 OS_EVENT* mutex_item_count;
-OS_EVENT* mutex_done;
-OS_EVENT* RobotQueueTeam1;
-OS_EVENT* RobotQueueTeam2;
 
-int Producer_done = 0;
+OS_EVENT* Robot_A_Queue;
+OS_EVENT* Robot_B1_Queue;
+OS_EVENT* Robot_B2_Queue;
+
 
 /*
 *********************************************************************************************************
@@ -90,19 +89,20 @@ typedef struct work_data {
 void main(void)
 {
 	UBYTE err;
-	void *RobotTeam1Msg[10];
-	void *RobotTeam2Msg[10];
+	void *RobotAMsg[10];
+	void *RobotB1Msg[10];
+	void *RobotB2Msg[10];
 
 	// A completer
 
 	OSInit();
 
-	RobotQueueTeam1 = OSQCreate(&RobotTeam1Msg[0], 10);
-	RobotQueueTeam2 = OSQCreate(&RobotTeam2Msg[0], 10);
+	Robot_A_Queue = OSQCreate(&RobotAMsg[0], 10);
+	Robot_B1_Queue = OSQCreate(&RobotB1Msg[0], 10);
+	Robot_B2_Queue = OSQCreate(&RobotB2Msg[0], 10);
 
 	mutex_item_count = OSMutexCreate(MUTEX_ITEM_COUNT_PRIO, &err);
-	mutex_done = OSMutexCreate(MUTEX_DONE_PRIO, &err);
-
+	errMsg(err, "Erreur creation mutex_item_count");
 
 	errMsg(OSTaskCreate(controller, (void*)0, &controllerStk[TASK_STK_SIZE - 1], CONTROLLER_PRIO), "Erreur Controller");
 	errMsg(OSTaskCreate(robotA, (void*) 1, &prepRobotA1Stk[TASK_STK_SIZE - 1], ROBOT_A1_PRIO), "Erreur Robot A - 1");
@@ -124,115 +124,85 @@ void main(void)
 void robotA(void* data)
 {
 	INT8U err;
-	INT16U value;
 	int startTime = 0;
 	int orderNumber = 1;
 
-	printf("ROBOT A @ %d : DEBUT.\n", OSTimeGet() - startTime);
+	printf("ROBOT A%d @ %d : DEBUT.\n", data, OSTimeGet() - startTime);
 	int itemCountRobotA;
 	work_data* wd;
+
 	while (1)
 	{
-		OSMutexPend(mutex_done, 0, &err);
+		// A completer
+		wd = OSQPend(Robot_A_Queue, 0, &err);
+		errMsg(err, "Error while trying to access Robot_A_Queue");
 
-		if (Producer_done) {
-			OSMutexPost(mutex_done);
-			value = OSQAccept(RobotQueueTeam1, &err);
-			if (value == 0) {
-				printf("Cons A va se détruire\n");
-				OSTaskDel(OS_PRIO_SELF);
-			}
+		if ((int)data == 1) {
+			err = OSQPost(Robot_B1_Queue, &(wd->work_data_b));
+			errMsg(err, "Erreur Robot B1 Post Queue");
+		}
+		else if ((int)data == 2) {
+			err = OSQPost(Robot_B2_Queue, &(wd->work_data_b));
+			errMsg(err, "Erreur Robot B2 Post Queue");
 		}
 		else {
-			OSMutexPost(mutex_done);
-
-			if ((int)data == 1) {
-				wd = OSQPend(RobotQueueTeam1, 0, &err);
-				errMsg(err, "Error while trying to access RobotQueueTeam1");
-
-				err = OSQPost(RobotQueueTeam1, &(wd->work_data_b));
-				errMsg(err, "Erreur Robot B1 Post Queue");
-			}
-			else if ((int)data == 2) {
-				wd = OSQPend(RobotQueueTeam2, 0, &err);
-				errMsg(err, "Error while trying to access RobotQueueTeam2");
-
-				err = OSQPost(RobotQueueTeam2, &(wd->work_data_b));
-				errMsg(err, "Erreur Robot B2 Post Queue");
-			}
-			else {
-				printf("Error wrong Data");
-				exit(1);
-			}
-
-			itemCountRobotA = wd->work_data_a;
-
-			OSMutexPend(mutex_item_count, 0, &err);
-			errMsg(err, "Error while trying to access mutex_item_count");
-			writeCurrentTotalItemCount(readCurrentTotalItemCount() + itemCountRobotA);
-			err = OSMutexPost(mutex_item_count);
-			errMsg(err, "Error while trying to post mutex_item_count");
-
-
-			int counter = 0;
-			while (counter < itemCountRobotA * 1000) { counter++; }
-			printf("ROBOT A COMMANDE #%d avec %d items @ %d.\n", orderNumber, itemCountRobotA, OSTimeGet() - startTime);
-
-			orderNumber++;
+			printf("Error wrong Data");
+			exit(1);
 		}
+
+		itemCountRobotA = wd->work_data_a;
+
+		OSMutexPend(mutex_item_count, 0, &err);
+		errMsg(err, "Error while trying to access mutex_item_count");
+		writeCurrentTotalItemCount(readCurrentTotalItemCount() + itemCountRobotA);
+		err = OSMutexPost(mutex_item_count);
+		errMsg(err, "Error while trying to post mutex_item_count");
+
+
+		int counter = 0;
+		while (counter < itemCountRobotA * 1000) { counter++; }
+		printf("ROBOT A%d COMMANDE #%d avec %d items @ %d.\n", data, orderNumber, itemCountRobotA, OSTimeGet() - startTime);
+
+		orderNumber++;
 	}
 }
 
 void robotB(void* data)
 {
 	INT8U err;
-	INT16U value;
 	int startTime = 0;
 	int orderNumber = 1;
-	printf("ROBOT B @ %d : DEBUT. \n", OSTimeGet() - startTime);
+
+	printf("ROBOT B%d @ %d : DEBUT. \n", data, OSTimeGet() - startTime);
 	int itemCountRobotB;
 
 	while (1)
 	{
-		OSMutexPend(mutex_done, 0, &err);
-
-		if (Producer_done) {
-			OSMutexPost(mutex_done);
-			value = OSQAccept(RobotQueueTeam2, &err);
-			if (value == 0) {
-				printf("Cons B va se détruire\n");
-				OSTaskDel(OS_PRIO_SELF);
-			}
+		// A completer
+		if ((int)data == 1) {
+			itemCountRobotB = *(int*)OSQPend(Robot_B1_Queue, 0, &err);
+			errMsg(err, "Error while trying to access Robot_B1_Queue");
+		}
+		else if ((int)data == 2) {
+			itemCountRobotB = *(int*)OSQPend(Robot_B2_Queue, 0, &err);
+			errMsg(err, "Error while trying to access Robot_B1_Queue");
 		}
 		else {
-			OSMutexPost(mutex_done);
-
-			// A completer
-			if ((int)data == 1) {
-				itemCountRobotB = *(int*)OSQPend(RobotQueueTeam1, 0, &err);
-				errMsg(err, "Error while trying to access RobotB_Queue");
-			}
-			else if ((int)data == 2) {
-				itemCountRobotB = *(int*)OSQPend(RobotQueueTeam2, 0, &err);
-				errMsg(err, "Error while trying to access RobotB_Queue");
-			}
-			else {
-				printf("Error wrong Data");
-				exit(1);
-			}
-
-			OSMutexPend(mutex_item_count, 0, &err);
-			errMsg(err, "Error while trying to access mutex_item_count");
-			writeCurrentTotalItemCount(readCurrentTotalItemCount() + itemCountRobotB);
-			err = OSMutexPost(mutex_item_count);
-			errMsg(err, "Error while trying to post mutex_item_count");
-
-			int counter = 0;
-			while (counter < itemCountRobotB * 1000) { counter++; }
-			printf("ROBOT B COMMANDE #%d avec %d items @ %d.\n", orderNumber, itemCountRobotB, OSTimeGet() - startTime);
-
-			orderNumber++;
+			printf("Error wrong Data");
+			exit(1);
 		}
+
+		OSMutexPend(mutex_item_count, 0, &err);
+		errMsg(err, "Error while trying to access mutex_item_count");
+		writeCurrentTotalItemCount(readCurrentTotalItemCount() + itemCountRobotB);
+		err = OSMutexPost(mutex_item_count);
+		errMsg(err, "Error while trying to post mutex_item_count");
+
+		int counter = 0;
+		while (counter < itemCountRobotB * 1000) { counter++; }
+		printf("ROBOT B%d COMMANDE #%d avec %d items @ %d.\n", data, orderNumber, itemCountRobotB, OSTimeGet() - startTime);
+
+		orderNumber++;
 	}
 }
 
@@ -246,7 +216,7 @@ void controller(void* data)
 
 	for (int i = 1; i < 11; i++)
 	{
-		//Création d'une commande
+		//Crï¿½ation d'une commande
 		workData = malloc(sizeof(work_data));
 
 		workData->work_data_a = (rand() % 8 + 3) * 10;
@@ -255,20 +225,16 @@ void controller(void* data)
 		printf("TACHE CONTROLLER @ %d : COMMANDE #%d. \n prep time A = %d, prep time B = %d\n", OSTimeGet() - startTime, i, workData->work_data_a, workData->work_data_b);
 		
 		// A completer
-		err = OSQPost(RobotQueueTeam1, workData);
-		errMsg(err, "Erreur Robot Team 1 Post Queue");
+		err = OSQPost(Robot_A_Queue, workData);
+		errMsg(err, "Erreur Robot A Post Queue");
 
-		err = OSQPost(RobotQueueTeam2, workData);
-		errMsg(err, "Erreur Robot Team 2 Post Queue");
-
-		// Délai aléatoire avant nouvelle commande
+		// Dï¿½lai alï¿½atoire avant nouvelle commande
 		randomTime = (rand() % 9 + 5) * 4;
 		OSTimeDly(randomTime);
 	}
-	OSMutexPend(mutex_done, 0, &err);
-	Producer_done = 1;
-	printf("Fin de la Production\n");
-	OSMutexPost(mutex_done);
+
+	producer_done = 1;
+
 	free(workData);
 }
 
