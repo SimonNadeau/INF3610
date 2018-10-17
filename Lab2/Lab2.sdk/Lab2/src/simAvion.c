@@ -140,6 +140,8 @@ int create_tasks() {
 int create_events() {
 	uint8_t err;
 
+	/* TODO: Creation des semaphores, flags, files, maiblox, mutex, ... */
+
 	mutexPrint = OSMutexCreate(MUTEX_PRINT_PRIO, &err);
 	errMsg(err, "Error while creation of print mutex");
 
@@ -153,7 +155,12 @@ int create_events() {
 		safePrint("Error while creation event semStat");
 	}
 
-	/* TODO: Creation des semaphores, flags, files, maiblox, mutex, ... */
+	Q_atterrissage_high = OSQCreate(&Q_atterrissage_high_data[0], 3);
+	Q_atterrissage_medium = OSQCreate(&Q_atterrissage_medium_data[0], 4);
+	Q_atterrissage_low = OSQCreate(&Q_atterrissage_low_data[0], 6);
+
+	Q_decollage = OSQCreate(&Q_decollage_data[0], 10);
+
 	return 0;
 }
 
@@ -171,6 +178,9 @@ void generation(void* data) {
 
 	while (1) {
 		/*TODO: Synchronisation unilaterale timer 1s*/
+		OSSemPend(semGen, 0, &err);
+		errMsg(err, "Error while trying to access semGen");
+
 		srand(seed);
 		skipGen = rand() % 5; //On saute la generation 1 fois sur 5
 		if (skipGen != 0){
@@ -180,9 +190,24 @@ void generation(void* data) {
 			nbAvionsCrees++;
 
 			/*TODO: Envoi des avions dans les files appropriees*/
+			if (avion->retard <= BORNE_SUP_LOW){
+				err = OSQPost(Q_atterrissage_low, avion);
+				errMsg(err, "Erreur Atterrissage Low Post Queue");
+			}
+			else if (avion->retard >= BORNE_INF_MEDIUM && avion->retard <= BORNE_SUP_MEDIUM) {
+				err = OSQPost(Q_atterrissage_medium, avion);
+				errMsg(err, "Erreur Atterrissage Medium Post Queue");
+			}
+			else if (avion->retard >= BORNE_INF_HIGH && avion->retard <= BORNE_SUP_HIGH){
+				err = OSQPost(Q_atterrissage_high, avion);
+				errMsg(err, "Erreur Atterrissage High Post Queue");
+			}
+			else {
+				errMsg(err, "Impossible retard time");
+			}
 		}
 		else{
-			/*safePrint("[GENERATION] Pas de generation\n");*/
+			safePrint("[GENERATION] Pas de generation\n");
 		}
 		seed++;
 	}
