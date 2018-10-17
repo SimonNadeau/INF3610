@@ -28,7 +28,7 @@
 #define	TERMINAL0_PRIO		7
 #define	TERMINAL1_PRIO		8
 #define	DECOLLAGE_PRIO		9
-//#define MUTEX_PRINT_PRIO	2
+#define MUTEX_PRINT_PRIO	10
 
 //Intervalles criteres de retard (en minutes)
 #define BORNE_INF_LOW      	0
@@ -80,7 +80,7 @@ void *Q_decollage_data[10];
 OS_EVENT* semGen;
 OS_EVENT* semVer;
 OS_EVENT* semStat;
-//OS_EVENT* mutexPrint;
+OS_EVENT* mutexPrint;
 
 /*
 *********************************************************************************************************
@@ -128,7 +128,7 @@ void	statistiques(void *data);
 void 	verification(void* data);
 
 void    errMsg(INT8U err, char* errMSg);
-//void 	safePrint(char* printMsg);
+void 	safePrint(char* printMsg);
 
 
 #endif /* SRC_SIMAVION_H_ */
