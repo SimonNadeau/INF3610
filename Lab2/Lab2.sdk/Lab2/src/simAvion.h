@@ -19,16 +19,19 @@
 *********************************************************************************************************
 */
 
-#define TASK_STK_SIZE       16384            // Size of each task's stacks (# of WORDs)
+#define TASK_STK_SIZE       	16384            // Size of each task's stacks (# of WORDs)
 
-#define	VERIFICATION_PRIO	3				// Defining Priority of each task
-#define	GENERATION_PRIO		4
-#define	STATISTIQUES_PRIO	5
-#define	ATTERRISSAGE_PRIO	6
-#define	TERMINAL0_PRIO		7
-#define	TERMINAL1_PRIO		8
-#define	DECOLLAGE_PRIO		9
-#define MUTEX_PRINT_PRIO	10
+#define	VERIFICATION_PRIO		3				// Defining Priority of each task
+#define	GENERATION_PRIO			4
+#define	STATISTIQUES_PRIO		5
+#define	ATTERRISSAGE_PRIO		6
+#define	TERMINAL0_PRIO			7
+#define	TERMINAL1_PRIO			8
+#define	DECOLLAGE_PRIO			9
+#define MUTEX_PRINT_PRIO		10
+#define MUTEX_DECOLLAGE_PRIO	11
+#define MUTEX_ATTERRISSAGE_PRIO	11
+
 
 //Intervalles criteres de retard (en minutes)
 #define BORNE_INF_LOW      	0
@@ -81,6 +84,11 @@ OS_EVENT* semGen;
 OS_EVENT* semVer;
 OS_EVENT* semStat;
 OS_EVENT* mutexPrint;
+OS_EVENT* mutexDecollage;
+OS_EVENT* mutexAtterrissage;
+OS_EVENT* mutexTerminal0;
+OS_EVENT* mutexTerminal1;
+
 
 /*
 *********************************************************************************************************

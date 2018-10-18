@@ -145,6 +145,12 @@ int create_events() {
 	mutexPrint = OSMutexCreate(MUTEX_PRINT_PRIO, &err);
 	errMsg(err, "Error while creation of print mutex");
 
+	mutexDecollage = OSMutexCreate(MUTEX_DECOLLAGE_PRIO, &err);
+	errMsg(err, "Error while creation of decollage mutex");
+
+	mutexAtterrissage = OSMutexCreate(MUTEX_ATTERRISSAGE_PRIO, &err);
+	errMsg(err, "Error while creation of Atterrissage mutex");
+
 	if (!(semGen = OSSemCreate(0))){
 		safePrint("Error while creation event semGen");
 	}
@@ -221,9 +227,33 @@ void atterrissage(void* data)
 	safePrint("[ATTERRISSAGE] Tache lancee\n");
 	while (1) {
 		/*TODO: Mise en attente des 3 files en fonction de leur priorité*/
+		avionPrioHigh = OSQPend(Q_atterrissage_high, 0, &err);
+		errMsg(err, "Error while trying to access Q_atterrissage_high");
+
+		avionPrioMed = OSQPend(Q_atterrissage_medium, 0, &err);
+		errMsg(err, "Error while trying to access Q_atterrissage_medium");
+
+		avionPrioLow = OSQPend(Q_atterrissage_low, 0, &err);
+		errMsg(err, "Error while trying to access Q_atterrissage_low");
+
+		if (OSQPend(Q_atterrissage_high, 0, &err) != NULL) {
+			avion = OSQPend(Q_atterrissage_high, 0, &err);
+		}
+		else if (OSQPend(Q_atterrissage_med, 0, &err) != NULL) {
+			avion = OSQPend(Q_atterrissage_med, 0, &err);
+		}
+		else if (OSQPend(Q_atterrissage_low, 0, &err) != NULL){
+			avion = OSQPend(Q_atterrissage_low, 0, &err);
+		}
+
+		OSMutexPend(mutexAtterrissage, 0, &err);
+		errMsg(err, "Error while trying to access mutexAtterrissage");
 
 		safePrint("[ATTERRISSAGE] Debut atterrissage\n");
 		OSTimeDly(150); //Temps pour que l'avion atterrisse
+
+		err = OSMutexPost(mutexAtterrissage);
+		errMsg(err, "Error while trying to post mutexAtterrissage");
 
 		safePrint("[ATTERRISSAGE] Attente terminal libre\n");
 		/*TODO: Mise en attente d'un terminal libre (mecanisme a votre choix)*/
@@ -250,6 +280,10 @@ void terminal(void* data)
 		remplirAvion(avion);
 
 		/*TODO: Envoi de l'avion pour le piste de decollage*/
+		err = OSQPost(Q_decollage, avion);
+		errMsg(err, "Erreur Avion Post Queue");
+
+
 		safePrint("[TERMINAL 0] Liberation avion\n"); //TODO: A modifier
 
 		/*TODO: Notifier que le terminal est libre (mecanisme de votre choix)*/
@@ -265,11 +299,20 @@ void decollage(void* data)
 
 	while (1) {
 		/*TODO: Mise en attente d'un avion pret pour le decollage*/
+		avion = OSQPend(Q_decollage, 0, &err);
+		errMsg(err, "Error while trying to access RobotA_Queue");
+
+		OSMutexPend(mutexDecollage, 0, &err);
+		errMsg(err, "Error while trying to access mutexDecollage");
 
 		OSTimeDly(30); //Temps pour que l'avion decolle
 		safePrint("[DECOLLAGE] Avion decolle\n");
 
+		err = OSMutexPost(mutexDecollage);
+		errMsg(err, "Error while trying to post mutexDecollage");
+
 		/*TODO: Destruction de l'avion*/
+		free(avion);
 	}
 }
 
@@ -279,6 +322,8 @@ void statistiques(void* data){
 	safePrint("[STATISTIQUES] Tache lancee\n");
 	while(1){
 		/*TODO: Synchronisation unilaterale switches*/
+		OSSemPend(semStat, 0, &err);
+		errMsg(err, "Error while trying to access semVer");
 		safePrint("\n------------------ Affichage des statistiques ------------------\n");
 
 		/*TODO: Obtenir statistiques pour les files d'atterrissage*/
@@ -304,13 +349,17 @@ void verification(void* data){
 	uint8_t err;
 
 	safePrint("[VERIFICATION] Tache lancee\n");
-	/* while(1){
-		/*TODO: Synchronisation unilaterale avec timer 3s
+	while(1){
+		/*TODO: Synchronisation unilaterale avec timer 3s*/
+		OSSemPend(semVer, 0, &err);
+		errMsg(err, "Error while trying to access semVer");
+
 		if (stopSimDebordement){
-			/*TODO: Suspension de toutes les taches de la simulation
+			/*TODO: Suspension de toutes les taches de la simulation*/
+			cleanup(); // ?
 		}
 	}
-*/
+
 
 }
 void remplirAvion(Avion* avion) {
