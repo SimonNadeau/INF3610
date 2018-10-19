@@ -41,7 +41,7 @@ void initialize_gpio()
 	/*TODO: Initialisation du GPIO*/
 	XGpio_Initialize(&gpSwitch, GPIO_SW_DEVICE_ID);
 	XGpio_InterruptGlobalEnable(&gpSwitch);
-	XGpio_InterruptEnable(&gpSwitch, 0xFFFFFFFF);
+	XGpio_InterruptEnable(&gpSwitch, XGPIO_IR_MASK);
 }
 
 
@@ -152,17 +152,17 @@ int connect_irqs() {
 	/*TODO: Appel de vos fonctions de connexion */
 
 	/* Fit timer 1s*/
-	status = connect_timer_irq();
+	status = connect_fit_timer_1s_irq();
 	if (status != XST_SUCCESS)
 		return XST_FAILURE;
 
 	/* Fit timer 3s*/
-	status = connect_timer_irq();
+	status = connect_fit_timer_3s_irq();
 	if (status != XST_SUCCESS)
 		return XST_FAILURE;
 
 	/*GPIO*/
-	status = connect_timer_irq();
+	status = connect_gpio_irq();
 	if (status != XST_SUCCESS)
 		return XST_FAILURE;
 
@@ -236,7 +236,7 @@ int connect_fit_timer_3s_irq(){
 int connect_gpio_irq(){
 	int status;
 
-	status = XIntc_Connect(&axi_intc, GPIO_SW_IRQ_ID, gpio_isr, NULL);
+	status = XIntc_Connect(&axi_intc, GPIO_SW_IRQ_ID, gpio_isr, &gpSwitch);
 	if (status != XST_SUCCESS)
 		return status;
 

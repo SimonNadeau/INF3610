@@ -39,7 +39,7 @@ void fit_timer_1s_isr(void *not_valid) {
 	/*TODO: definition handler pour timer 1s*/
 	uint8_t err = OSSemPost(semGen);
 	errMsg(err, "semGen");
-	safePrint("Handler timer 1s");
+	//safePrint("Handler timer 1s\n");
 
 }
 
@@ -47,7 +47,7 @@ void fit_timer_3s_isr(void *not_valid) {
 	/*TODO: definition handler pour timer 3s*/
 	uint8_t err = OSSemPost(semVer);
 	errMsg(err, "semVer");
-	safePrint("Handler timer 3s");
+	//safePrint("Handler timer 3s\n");
 
 }
 
@@ -55,8 +55,8 @@ void gpio_isr(void * not_valid) {
 	/*TODO: definition handler pour switches*/
 	uint8_t err = OSSemPost(semStat);
 	errMsg(err, "semStat");
-	XGpio_InterruptClear(&gpSwitch, 0xFFFFFFF);
-	safePrint("Handler gpio");
+	XGpio_InterruptClear(&gpSwitch, XGPIO_IR_MASK);
+	//safePrint("Handler gpio\n");
 }
 
 /*
@@ -104,8 +104,8 @@ int create_tasks() {
 	// Stacks
 	static OS_STK generationStk[TASK_STK_SIZE]; //Stack of each task
 	static OS_STK atterrissage0Stk[TASK_STK_SIZE];
-	static OS_STK terminal0Stk[TASK_STK_SIZE];
 	static OS_STK terminal1Stk[TASK_STK_SIZE];
+	static OS_STK terminal2Stk[TASK_STK_SIZE];
 	static OS_STK decollageStk[TASK_STK_SIZE];
 	static OS_STK statistiquesStk[TASK_STK_SIZE];
 	static OS_STK verificationStk[TASK_STK_SIZE];
@@ -119,10 +119,10 @@ int create_tasks() {
 	err = OSTaskCreate(atterrissage, NULL, &atterrissage0Stk[TASK_STK_SIZE - 1], ATTERRISSAGE_PRIO);
 	errMsg(err, "Error with atterrissage task creation");
 
-	err = OSTaskCreate(terminal, (void*) 1, &terminal0Stk[TASK_STK_SIZE - 1], TERMINAL0_PRIO);
+	err = OSTaskCreate(terminal, (void*) 1, &terminal1Stk[TASK_STK_SIZE - 1], TERMINAL1_PRIO);
 	errMsg(err, "Error with terminal 0 task creation");
 
-	err = OSTaskCreate(terminal, (void*) 2, &terminal1Stk[TASK_STK_SIZE - 1], TERMINAL1_PRIO);
+	err = OSTaskCreate(terminal, (void*) 2, &terminal2Stk[TASK_STK_SIZE - 1], TERMINAL2_PRIO);
 	errMsg(err, "Error with terminal 1 task creation");
 
 	err = OSTaskCreate(decollage, NULL, &decollageStk[TASK_STK_SIZE - 1], DECOLLAGE_PRIO);
@@ -142,6 +142,9 @@ int create_events() {
 
 	/* TODO: Creation des semaphores, flags, files, maiblox, mutex, ... */
 
+	mutexVerification = OSMutexCreate(MUTEX_VERIFICATION_PRIO, &err);
+	errMsg(err, "Error while creation of verification mutex");
+
 	mutexPrint = OSMutexCreate(MUTEX_PRINT_PRIO, &err);
 	errMsg(err, "Error while creation of print mutex");
 
@@ -150,6 +153,13 @@ int create_events() {
 
 	mutexAtterrissage = OSMutexCreate(MUTEX_ATTERRISSAGE_PRIO, &err);
 	errMsg(err, "Error while creation of Atterrissage mutex");
+
+	mutexTerminal1 = OSMutexCreate(MUTEX_TERMINAL1_PRIO, &err);
+	errMsg(err, "Error while creation of mutexTerminal1");
+
+	mutexTerminal2 = OSMutexCreate(MUTEX_TERMINAL2_PRIO, &err);
+	errMsg(err, "Error while creation of mutexTerminal1");
+
 
 	if (!(semGen = OSSemCreate(0))){
 		safePrint("Error while creation event semGen");
@@ -166,6 +176,9 @@ int create_events() {
 	Q_atterrissage_low = OSQCreate(&Q_atterrissage_low_data[0], 6);
 
 	Q_decollage = OSQCreate(&Q_decollage_data[0], 10);
+
+	Q_terminal1 = OSQCreate(&Q_terminal1_data[0], 1);
+	Q_terminal2 = OSQCreate(&Q_terminal2_data[0], 1);
 
 	return 0;
 }
@@ -190,6 +203,7 @@ void generation(void* data) {
 		srand(seed);
 		skipGen = rand() % 5; //On saute la generation 1 fois sur 5
 		if (skipGen != 0){
+			safePrint("[GENERATION] Generation\n");
 			Avion* avion = malloc(sizeof(Avion));
 			avion->id = nbAvionsCrees;
 			remplirAvion(avion);
@@ -198,14 +212,17 @@ void generation(void* data) {
 			/*TODO: Envoi des avions dans les files appropriees*/
 			if (avion->retard <= BORNE_SUP_LOW){
 				err = OSQPost(Q_atterrissage_low, avion);
+				signalOverflow(err);
 				errMsg(err, "Erreur Atterrissage Low Post Queue");
 			}
 			else if (avion->retard >= BORNE_INF_MEDIUM && avion->retard <= BORNE_SUP_MEDIUM) {
 				err = OSQPost(Q_atterrissage_medium, avion);
+				signalOverflow(err);
 				errMsg(err, "Erreur Atterrissage Medium Post Queue");
 			}
 			else if (avion->retard >= BORNE_INF_HIGH && avion->retard <= BORNE_SUP_HIGH){
 				err = OSQPost(Q_atterrissage_high, avion);
+				signalOverflow(err);
 				errMsg(err, "Erreur Atterrissage High Post Queue");
 			}
 			else {
@@ -226,67 +243,121 @@ void atterrissage(void* data)
 	Avion* avion = NULL;
 	safePrint("[ATTERRISSAGE] Tache lancee\n");
 	while (1) {
+
+
 		/*TODO: Mise en attente des 3 files en fonction de leur priorité*/
-		avionPrioHigh = OSQPend(Q_atterrissage_high, 0, &err);
-		errMsg(err, "Error while trying to access Q_atterrissage_high");
-
-		avionPrioMed = OSQPend(Q_atterrissage_medium, 0, &err);
-		errMsg(err, "Error while trying to access Q_atterrissage_medium");
-
-		avionPrioLow = OSQPend(Q_atterrissage_low, 0, &err);
-		errMsg(err, "Error while trying to access Q_atterrissage_low");
-
-		if (OSQPend(Q_atterrissage_high, 0, &err) != NULL) {
-			avion = OSQPend(Q_atterrissage_high, 0, &err);
+		if ((avion = OSQAccept(Q_atterrissage_high, &err)) != NULL) {
+			processLanding();
 		}
-		else if (OSQPend(Q_atterrissage_med, 0, &err) != NULL) {
-			avion = OSQPend(Q_atterrissage_med, 0, &err);
+		else if ((avion = OSQAccept(Q_atterrissage_medium, &err)) != NULL) {
+			processLanding();
 		}
-		else if (OSQPend(Q_atterrissage_low, 0, &err) != NULL){
-			avion = OSQPend(Q_atterrissage_low, 0, &err);
+		else if ((avion = OSQAccept(Q_atterrissage_low, &err))!= NULL) {
+			processLanding();
 		}
 
-		OSMutexPend(mutexAtterrissage, 0, &err);
-		errMsg(err, "Error while trying to access mutexAtterrissage");
 
-		safePrint("[ATTERRISSAGE] Debut atterrissage\n");
-		OSTimeDly(150); //Temps pour que l'avion atterrisse
-
-		err = OSMutexPost(mutexAtterrissage);
-		errMsg(err, "Error while trying to post mutexAtterrissage");
-
-		safePrint("[ATTERRISSAGE] Attente terminal libre\n");
 		/*TODO: Mise en attente d'un terminal libre (mecanisme a votre choix)*/
-		//safePrint("[ATTERRISSAGE] Terminal libre num %d obtenu\n", ...);
-
 		/*TODO: Envoi de l'avion au terminal choisi (mecanisme de votre choix)*/
+		OS_Q_DATA qdata;
+		if (avion != NULL) {
+			err = OSQQuery(Q_terminal1, &qdata);
+			if (err == OS_ERR_NONE){
+				if (qdata.OSNMsgs == 0){
+					err = OSQPost(Q_terminal1, avion);
+					errMsg(err, "Erreur Post Q_terminal1");
+					avion = NULL;
+					safePrint("[ATTERRISSAGE] Terminal libre num 1 obtenu\n");
+				}
+			}
+			else {
+				errMsg(err, "Error while trying to query Terminal 1");
+			}
+		}
+
+		if (avion != NULL) {
+			err = OSQQuery(Q_terminal2, &qdata);
+			if (err == OS_ERR_NONE){
+				if (qdata.OSNMsgs == 0){
+					err = OSQPost(Q_terminal2, avion);
+					errMsg(err, "Erreur Post Q_terminal2");
+					avion = NULL;
+					safePrint("[ATTERRISSAGE] Terminal libre num 2 obtenu\n");
+				}
+			}
+			else {
+				errMsg(err, "Error while trying to query Terminal 2");
+			}
+		}
 	}
+}
+
+void processLanding(){
+	uint8_t err;
+
+	OSMutexPend(mutexAtterrissage, 0, &err);
+	xil_printf(err);
+	errMsg(err, "Error while trying to access mutexAtterrissage");
+
+	safePrint("[ATTERRISSAGE] Debut atterrissage\n");
+	OSTimeDly(150); //Temps pour que l'avion atterrisse
+
+	err = OSMutexPost(mutexAtterrissage);
+	errMsg(err, "Error while trying to post mutexAtterrissage");
+
+	safePrint("[ATTERRISSAGE] Attente terminal libre\n");
 }
 
 void terminal(void* data)
 {
 	uint8_t err;
-	int numTerminal = 0; //TODO: A modifier
+	int numTerminal = (int)data; //TODO: A modifier
 	Avion* avion = NULL;
-	safePrint("[TERMINAL 0 ] Tache lancee\n"); //TODO: A modifier
+	safePrint("[TERMINAL 1 ] Tache lancee\n"); //TODO: A modifier
 
 	while (1) {
 
 		/*TODO: Mise en attente d'un avion venant de la piste d'atterrissage*/
-		safePrint("[TERMINAL 0] Obtention avion\n"); //TODO: A modifier
+		if (numTerminal == 1) {
+			avion = OSQPend(Q_terminal1, 0, &err);
+			errMsg(err, "Error while trying to access Q_terminal1");
+			safePrint("[TERMINAL 1] Obtention avion\n");
 
-		OSTimeDly(160);//Attente pour le vidage, le nettoyage et le remplissage de l'avion
+			OSMutexPend(mutexTerminal1, 0, &err);
+			errMsg(err, "Error while trying to access mutexTerminal1");
 
-		remplirAvion(avion);
+			OSTimeDly(160);//Attente pour le vidage, le nettoyage et le remplissage de l'avion
+			remplirAvion(avion);
+
+			err = OSMutexPost(mutexTerminal1);
+			errMsg(err, "Error while trying to post mutexTerminal1");
+
+		} else if (numTerminal == 2) {
+			avion = OSQPend(Q_terminal2, 0, &err);
+			errMsg(err, "Error while trying to access Q_terminal2");
+			safePrint("[TERMINAL 2] Obtention avion\n");
+
+			OSMutexPend(mutexTerminal2, 0, &err);
+			errMsg(err, "Error while trying to access mutexTerminal2");
+
+			OSTimeDly(160);//Attente pour le vidage, le nettoyage et le remplissage de l'avion
+			remplirAvion(avion);
+
+			err = OSMutexPost(mutexTerminal2);
+			errMsg(err, "Error while trying to post mutexTerminal2");
+
+		} else {
+			safePrint("Wrong terminal number");
+		}
+
 
 		/*TODO: Envoi de l'avion pour le piste de decollage*/
+		/*TODO: Notifier que le terminal est libre (mecanisme de votre choix)*/
 		err = OSQPost(Q_decollage, avion);
 		errMsg(err, "Erreur Avion Post Queue");
 
-
-		safePrint("[TERMINAL 0] Liberation avion\n"); //TODO: A modifier
-
-		/*TODO: Notifier que le terminal est libre (mecanisme de votre choix)*/
+		if ((int)data == 1) {safePrint("[TERMINAL 1] Liberation avion\n");}
+		else if ((int)data == 2) {safePrint("[TERMINAL 2] Liberation avion\n");}
 	}
 	
 }
@@ -319,6 +390,7 @@ void decollage(void* data)
 
 void statistiques(void* data){
 	uint8_t err;
+	OS_Q_DATA qdata;
 	safePrint("[STATISTIQUES] Tache lancee\n");
 	while(1){
 		/*TODO: Synchronisation unilaterale switches*/
@@ -327,21 +399,89 @@ void statistiques(void* data){
 		safePrint("\n------------------ Affichage des statistiques ------------------\n");
 
 		/*TODO: Obtenir statistiques pour les files d'atterrissage*/
+		int nbrAvionHigh;
+		err = OSQQuery(Q_atterrissage_high, &qdata);
+		if (err == OS_ERR_NONE){
+			nbrAvionHigh = qdata.OSNMsgs;
+		} else {
+			errMsg(err, "Error while trying to query Q_atterrissage_high");
+		}
+		char* attenteHigh = "";
+		strcpy(attenteHigh, "Nb d'avions en attente d'atterrissage de type High : ");
+		strcat(attenteHigh, (char*)nbrAvionHigh);
+		strcat(attenteHigh, "\n");
+		safePrint(attenteHigh);
+
+		int nbrAvionMed;
+		err = OSQQuery(Q_atterrissage_medium, &qdata);
+		if (err == OS_ERR_NONE){
+			nbrAvionMed = qdata.OSNMsgs;
+		} else {
+			errMsg(err, "Error while trying to query Q_atterrissage_medium");
+		}
+		char* attenteMed = "";
+		strcpy(attenteMed, "Nb d'avions en attente d'atterrissage de type Medium : ");
+		strcat(attenteMed, (char*)nbrAvionMed);
+		strcat(attenteMed, "\n");
+		safePrint(attenteMed);
+
+		int nbrAvionLow;
+		err = OSQQuery(Q_atterrissage_low, &qdata);
+		if (err == OS_ERR_NONE){
+			nbrAvionLow = qdata.OSNMsgs;
+		} else {
+			errMsg(err, "Error while trying to query Q_atterrissage_low");
+		}
+		char* attenteLow = "";
+		strcpy(attenteLow, "Nb d'avions en attente d'atterrissage de type Low : ");
+		strcat(attenteLow, (char*)nbrAvionLow);
+		strcat(attenteLow, "\n");
+		safePrint(attenteLow);
+
+
 		/*xil_printf("Nb d'avions en attente d'atterrissage de type High : %d\n", ...);
 		xil_printf("Nb d'avions en attente d'atterrissage de type Medium : %d\n", ...);
 		xil_printf("Nb d'avions en attente d'atterrissage de type Low : %d\n", ...);*/
 
 		/*TODO: Obtenir statistiques pour la file de decollage*/
-		//xil_printf("Nb d'avions en attente de decollage : %d\n", ...);
+		int nbrAvionDecollage = 0;
+		err = OSQQuery(Q_terminal1, &qdata);
+		if (err == OS_ERR_NONE){
+			nbrAvionDecollage = qdata.OSNMsgs;
+		} else {
+			errMsg(err, "Error while trying to query Terminal 1");
+		}
+		char* attenteDecollage = "";
+		strcpy(attenteDecollage, "Nb d'avions en attente de decollage : ");
+		strcat(attenteDecollage, (char*)nbrAvionDecollage);
+		strcat(attenteDecollage, "\n");
+		safePrint(attenteDecollage);
+
 
 		/*TODO: Obtenir statut des terminaux*/
-		safePrint("Terminal 0 ");
-		int statutTerm0 = 0; /*A modifier (simplement un exemple d'affichage pour vous aider)*/
-		(statutTerm0 == 0) ? safePrint("OCCUPE\n") : safePrint("LIBRE\n");
-
 		safePrint("Terminal 1 ");
-		int statutTerm1 = 0; /*A modifier (simplement un exemple d'affichage pour vous aider)*/
-		(statutTerm1 == 0) ? safePrint("OCCUPE\n") : safePrint("LIBRE\n");
+		err = OSQQuery(Q_terminal1, &qdata);
+		if (err == OS_ERR_NONE){
+			if (qdata.OSNMsgs == 0){
+				safePrint("LIBRE\n");
+			} else {
+				safePrint("OCCUPE\n");
+			}
+		} else {
+			errMsg(err, "Error while trying to query Terminal 1");
+		}
+
+		safePrint("Terminal 2 ");
+		err = OSQQuery(Q_terminal2, &qdata);
+		if (err == OS_ERR_NONE){
+			if (qdata.OSNMsgs == 0){
+				safePrint("LIBRE\n");
+			} else {
+				safePrint("OCCUPE\n");
+			}
+		} else {
+			errMsg(err, "Error while trying to query Terminal 2");
+		}
 	}
 }
 
@@ -356,7 +496,29 @@ void verification(void* data){
 
 		if (stopSimDebordement){
 			/*TODO: Suspension de toutes les taches de la simulation*/
-			cleanup(); // ?
+
+			OSTaskSuspend(STATISTIQUES_PRIO);
+			errMsg(err, "Error with suspending task statistique");
+
+			OSTaskSuspend(GENERATION_PRIO);
+			errMsg(err, "Error with suspending task generation");
+
+			OSTaskSuspend(ATTERRISSAGE_PRIO);
+			errMsg(err, "Error with suspending task atterrissage");
+
+			OSTaskSuspend(TERMINAL1_PRIO);
+			errMsg(err, "Error with suspending task terminal 1");
+
+			OSTaskSuspend(TERMINAL2_PRIO);
+			errMsg(err, "Error with suspending task terminal 2");
+
+			OSTaskSuspend(DECOLLAGE_PRIO);
+			errMsg(err, "Error with suspending task decollage");
+
+			OSTaskSuspend(VERIFICATION_PRIO);
+			errMsg(err, "Error with suspending task verification");
+
+			exit(1);
 		}
 	}
 
@@ -367,9 +529,24 @@ void remplirAvion(Avion* avion) {
 	avion->retard = rand() % BORNE_SUP_HIGH;
 	avion->origine = rand() % NB_AEROPORTS;
 	do { avion->destination = rand() % NB_AEROPORTS; } while (avion->origine == avion->destination);
-	/*xil_printf("Avion retard = %d\n", avion->retard);
-	xil_printf("Avion origine = %d\n", avion->origine);
-	xil_printf("Avion destination = %d\n", avion->destination);*/
+
+	xil_printf("Avion retard = %d\n", avion->retard);
+/*
+	safePrint("Avion origine = %d\n", avion->origine);
+	safePrint("Avion destination = %d\n", avion->destination);*/
+}
+
+void signalOverflow(uint8_t err)
+{
+	if (err != OS_ERR_NONE)
+	{
+		xil_printf("Overflow");
+		OSMutexPend(mutexVerification, 0, &err);
+		errMsg(err, "Error while trying to access mutexVerification");
+		stopSimDebordement = true;
+		err = OSMutexPost(mutexVerification);
+		errMsg(err, "Error while trying to post mutexVerification");
+	}
 }
 
 void errMsg(uint8_t err, char* errMsg)
@@ -386,13 +563,13 @@ void errMsg(uint8_t err, char* errMsg)
 
 void safePrint(char* printMsg)
 {
-	uint8_t err;
+	//uint8_t err;
 
-	OSMutexPend(mutexPrint, 0, &err);
-	errMsg(err, "Error while trying to access mutexPrint");
+	//OSMutexPend(mutexPrint, 0, &err);
+	//errMsg(err, "Error while trying to access mutexPrint");
 
 	xil_printf(printMsg);
 
-	err = OSMutexPost(mutexPrint);
-	errMsg(err, "Error while trying to post mutexPrint");
+	//err = OSMutexPost(mutexPrint);
+	//errMsg(err, "Error while trying to post mutexPrint");
 }
