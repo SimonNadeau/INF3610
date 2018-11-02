@@ -7,6 +7,7 @@
 #include "Sobel.h"
 #include "Sobelv2.h"
 #include "Reader.h"
+#include "Writer.h"
 #include "DataRAM.h"
 #include "CacheMem.h"
 
@@ -31,6 +32,7 @@ int sc_main(int arg_count, char **arg_value)
 	Reader reader("Reader");
 	DataRAM dataRAM("DataRAM", "image.mem", RAMSIZE, false);
 	//TODO : Déclaration du module de l'écrivain
+	Writer writer("Writer");
 
 	// Signals
 	sc_signal<unsigned int, SC_MANY_WRITERS> data;
@@ -38,6 +40,7 @@ int sc_main(int arg_count, char **arg_value)
 	sc_signal<unsigned int*> addressData;
 	sc_signal<unsigned int> length;
 	sc_signal<bool, SC_MANY_WRITERS> reqRead;
+	sc_signal<bool, SC_MANY_WRITERS> reqWrite;
 	sc_signal<bool, SC_MANY_WRITERS> ackReaderWriter;
 
 	/* à compléter*/
@@ -51,21 +54,32 @@ int sc_main(int arg_count, char **arg_value)
 	reader.dataPortRAM(dataRAM);
 
 	/* à compléter */
+	writer.clk(clk);
+	writer.data(data);
+	writer.address(address);
+	writer.request(reqRead);
+	writer.ack(ackReaderWriter);
+	writer.dataPortRAM(dataRAM);
 
 	const bool utiliseCacheMem = false;
 
 	if (!utiliseCacheMem) {
 		Sobel sobel("Sobel");
 
-		sobel.clk(clk);
 		/* à compléter */
+		sobel.clk(clk);
+		sobel.data(data);
+		sobel.address(address);
+		sobel.ack(ackReaderWriter);
+		sobel.requestRead(reqRead);
+		sobel.requestWrite(reqWrite);
 
 		// Démarrage de l'application
 		cout << "Démarrage de la simulation." << endl;
 		sc_start(-1, sc_core::sc_time_unit(sim_units));
 		cout << endl << "Simulation s'est terminée à " << sc_time_stamp();
 	} else {
-		Sobelv2 sobel("Sobel");
+		Sobelv2 sobel2("Sobel");
 		CacheMem cacheMem("CacheMem");
 
 		/* à compléter*/

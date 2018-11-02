@@ -10,9 +10,11 @@
 //	Constructor
 //
 ///////////////////////////////////////////////////////////////////////////////
-Reader::Reader(sc_module_name name) /* à compléter */
+Reader::Reader(sc_module_name name) : sc_channel(name) /* à compléter */
 {
 	/* à compléter */
+	SC_THREAD(thread);
+	sensitive << clk.pos();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

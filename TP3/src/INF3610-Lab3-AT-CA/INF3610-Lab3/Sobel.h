@@ -14,7 +14,7 @@
 //	Class Sobel
 //
 ///////////////////////////////////////////////////////////////////////////////
-class Sobel /* À compléter */
+class Sobel : sc_module /* À compléter */
 {
 	public: 
 		// Ports
@@ -34,13 +34,11 @@ class Sobel /* À compléter */
 		
 	private:
 		// Process SystemC
-		/*
-		
-		À compléter
-		
-		*/
-
+		/* À compléter */
+		SC_HAS_PROCESS(Sobel);
 		
 		void thread(void);
 		uint8_t Sobel::sobel_operator(const int index, const int imgWidth, uint8_t * image);
+		//unsigned int Sobel::Read(unsigned int addresse);
+		//void Sobel::Write(unsigned int addresse, unsigned int dataToWrite);
 };

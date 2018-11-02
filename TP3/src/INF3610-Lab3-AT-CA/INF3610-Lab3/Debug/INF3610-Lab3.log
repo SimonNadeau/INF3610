@@ -1,0 +1,27 @@
+﻿  assert.c
+  CacheMem.cpp
+  Sobel.cpp
+  Sobelv2.cpp
+  DataRAM.cpp
+  main.cpp
+  RAM.cpp
+  Reader.cpp
+  Writer.cpp
+c1xx : fatal error C1083: Impossible d'ouvrir le fichier source : 'Writer.cpp' : No such file or directory
+c:\users\machaci\documents\inf3610\tp3\src\inf3610-lab3-at-ca\inf3610-lab3\sobelv2.cpp(77): error C2039: 'Sobel_operator' : n'est pas membre de 'Sobelv2'
+  c:\users\machaci\documents\inf3610\tp3\src\inf3610-lab3-at-ca\inf3610-lab3\sobelv2.h(18): note: voir la déclaration de 'Sobelv2'
+c:\users\machaci\documents\inf3610\tp3\src\inf3610-lab3-at-ca\inf3610-lab3\main.cpp(34): error C2065: 'Writer' : identificateur non déclaré
+c:\users\machaci\documents\inf3610\tp3\src\inf3610-lab3-at-ca\inf3610-lab3\main.cpp(34): error C2146: erreur de syntaxe : absence de ';' avant l'identificateur 'Writer'
+c:\users\machaci\documents\inf3610\tp3\src\inf3610-lab3-at-ca\inf3610-lab3\main.cpp(34): error C3861: 'Writer' : identificateur introuvable
+c:\users\machaci\documents\inf3610\tp3\src\inf3610-lab3-at-ca\inf3610-lab3\reader.cpp(13): error C2614: 'Reader' : initialisation de membre non conforme : 'sc_channel' n'est ni une base ni un membre
+c:\users\machaci\documents\inf3610\tp3\src\inf3610-lab3-at-ca\inf3610-lab3\reader.cpp(16): error C2440: 'static_cast' : impossible de convertir de 'void (__thiscall Reader::* )(void)' en 'sc_core::SC_ENTRY_FUNC'
+  c:\users\machaci\documents\inf3610\tp3\src\inf3610-lab3-at-ca\inf3610-lab3\reader.cpp(16): note: Les types pointés n'ont aucun rapport entre eux ; conversion nécessitant reinterpret_cast, cast de style C ou cast de style fonction
+c:\users\machaci\documents\inf3610\tp3\src\inf3610-lab3-at-ca\inf3610-lab3\reader.cpp(16): error C2660: 'sc_core::sc_simcontext::create_thread_process' : la fonction ne prend pas 4 arguments
+  c:\users\machaci\documents\inf3610\tp3\src\systemc-2.3.1\src\sysc\kernel\sc_simcontext.h(218): note: voir la déclaration de 'sc_core::sc_simcontext::create_thread_process' (compilation du fichier source Reader.cpp)
+c:\users\machaci\documents\inf3610\tp3\src\inf3610-lab3-at-ca\inf3610-lab3\reader.cpp(16): error C2039: 'sensitive' : n'est pas membre de 'Reader'
+  c:\users\machaci\documents\inf3610\tp3\src\inf3610-lab3-at-ca\inf3610-lab3\reader.h(17): note: voir la déclaration de 'Reader'
+c:\users\machaci\documents\inf3610\tp3\src\inf3610-lab3-at-ca\inf3610-lab3\reader.cpp(16): error C2039: 'sensitive_pos' : n'est pas membre de 'Reader'
+  c:\users\machaci\documents\inf3610\tp3\src\inf3610-lab3-at-ca\inf3610-lab3\reader.h(17): note: voir la déclaration de 'Reader'
+c:\users\machaci\documents\inf3610\tp3\src\inf3610-lab3-at-ca\inf3610-lab3\reader.cpp(16): error C2039: 'sensitive_neg' : n'est pas membre de 'Reader'
+  c:\users\machaci\documents\inf3610\tp3\src\inf3610-lab3-at-ca\inf3610-lab3\reader.h(17): note: voir la déclaration de 'Reader'
+c:\users\machaci\documents\inf3610\tp3\src\inf3610-lab3-at-ca\inf3610-lab3\reader.cpp(17): error C2065: 'sensitive' : identificateur non déclaré

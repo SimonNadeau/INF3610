@@ -14,7 +14,7 @@
 //	Class Reader
 //
 ///////////////////////////////////////////////////////////////////////////////
-class Reader /* À compléter */
+class Reader : sc_channel /* à compléter */
 {
 	public:
 		// Ports

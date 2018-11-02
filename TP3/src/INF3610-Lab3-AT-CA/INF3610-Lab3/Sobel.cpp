@@ -11,14 +11,11 @@
 //	Constructeur
 //
 ///////////////////////////////////////////////////////////////////////////////
-Sobel::Sobel( sc_module_name name )
-/* À compléter */
+Sobel::Sobel( sc_module_name name ) : sc_module(name) /* À compléter */
 {
-	/*
-	
-	À compléter
-	
-	*/
+	/* À compléter */
+	SC_THREAD(thread);
+	//sensitive << clk.pos;
 }
 
 
@@ -29,11 +26,7 @@ Sobel::Sobel( sc_module_name name )
 ///////////////////////////////////////////////////////////////////////////////
 Sobel::~Sobel()
 {
-	/*
-	
-	À compléter
-	
-	*/
+	/* À compléter */
 }
 
 
@@ -44,11 +37,7 @@ Sobel::~Sobel()
 ///////////////////////////////////////////////////////////////////////////////
 void Sobel::thread(void)
 {
-	/*
-	
-	À compléter
-	
-	*/
+	/* À compléter */
 
 }
 
