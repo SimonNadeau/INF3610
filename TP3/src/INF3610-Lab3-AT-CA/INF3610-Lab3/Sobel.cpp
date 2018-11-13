@@ -29,6 +29,37 @@ Sobel::~Sobel()
 	/* À compléter */
 }
 
+// Exemple de synchronisation "Handshaking"
+unsigned int Sobel::read(unsigned int readAddress) {
+	unsigned int dataToRead = 0;
+	address.write(readAddress);
+	requestRead.write(true);
+
+	// Wait for rising edge clk
+	do {
+		wait(clk->posedge_event());
+	} while (!ack.read());
+
+	dataToRead = data.read();
+	requestRead.write(false);
+
+	return dataToRead;
+
+}
+
+void Sobel::write(unsigned int writeAddress, unsigned int dataToWrite) {
+	address.write(writeAddress);
+	data.write(dataToWrite);
+	requestWrite.write(true);
+
+	// Wait for rising edge clk
+	do {
+		wait(clk->posedge_event());
+	} while (!ack.read());
+
+	requestWrite.write(false);
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -38,6 +69,75 @@ Sobel::~Sobel()
 void Sobel::thread(void)
 {
 	/* À compléter */
+	unsigned int imgWidth = 0;
+	unsigned int imgHeight = 0;
+	unsigned int threadAddress = 0;
+	unsigned int data = 0x00000000;
+	unsigned int adress = 0;
+
+	while (true)
+	{
+		// Lecture de l'image
+
+		imgWidth = read(threadAddress);
+		threadAddress += 4;
+		imgHeight = read(threadAddress);
+		unsigned int imgSize = imgWidth * imgHeight;
+
+		uint8_t * image = new uint8_t[imgSize];
+
+		for (unsigned int i = 0; i < imgHeight; i++) {
+			for (unsigned int j = 0; j < imgWidth; j += 4) {
+				address = j + i*imgWidth;
+				data = read(address + 8);
+				image[address] = data & 0x000000FF;
+				image[address + 1] = data & 0x0000FF00;
+				image[address + 2] = data & 0x00FF0000;
+				image[address + 3] = data & 0xFF000000;
+			}
+		}
+		
+		// Fin de la lecture
+
+		for (unsigned int i = 0; i < imgHeight; i++) {
+			for (unsigned int j = 0; j < imgWidth; j += 4) {
+				// Si c'est sur le bord;
+				address = j + i * imgWidth;
+				if (i == 0 || i == imgHeight - 1) {
+					write(8 + address, 0);
+				}
+				else {
+					wait(48); // Valeur non arbitraire. A justifier
+
+					// bits 0-7
+					unsigned int bits0to7 = 0;
+					if (j != 0) {
+						bits0to7 = sobel_operator(address, imgWidth, image);
+					}
+
+					// bits 8-15
+					unsigned int bits8to15 = sobel_operator(address + 1, imgWidth, image) << 8;
+
+					// bits 16-23
+					unsigned int bits16to23 = sobel_operator(address + 2, imgWidth, image) << 16;
+
+					// bits 24-31
+					unsigned int bits24to31 = 0;
+					if (j != imgWidth - 4) {
+						bits24to31 = sobel_operator(address + 3, imgWidth, image) << 24;
+					}
+
+					data = bits0to7 + bits8to15 + bits16to23 + bits24to31;
+					write(8 + address, data);
+				}
+			}
+		}
+		// Fin écriture
+
+		delete[] image;
+		sc_stop();
+
+	}
 
 }
 

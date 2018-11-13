@@ -9,6 +9,7 @@
 #include <stdio.h>
 
 
+
 ///////////////////////////////////////////////////////////////////////////////
 //
 //	Class Sobel
@@ -25,7 +26,6 @@ class Sobel : sc_module /* À compléter */
 		sc_out<bool>			requestWrite;
 		sc_in<bool>				ack;
 
-	
 		// Constructor
 		Sobel( sc_module_name name );
 		
@@ -37,8 +37,8 @@ class Sobel : sc_module /* À compléter */
 		/* À compléter */
 		SC_HAS_PROCESS(Sobel);
 		
+		unsigned int read(unsigned int);
+		void write(unsigned int, unsigned int);
 		void thread(void);
 		uint8_t Sobel::sobel_operator(const int index, const int imgWidth, uint8_t * image);
-		//unsigned int Sobel::Read(unsigned int addresse);
-		//void Sobel::Write(unsigned int addresse, unsigned int dataToWrite);
 };

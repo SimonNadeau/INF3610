@@ -44,11 +44,10 @@ Sobelv2::~Sobelv2()
 ///////////////////////////////////////////////////////////////////////////////
 void Sobelv2::thread(void)
 {
-	/*
-	
-	À compléter
-	
-	*/
+	/* À compléter */
+
+	int width = 0;
+	int height = 0;
 
 }
 
@@ -74,7 +73,7 @@ static inline uint8_t getVal(int index, int xDiff, int yDiff, int img_width, uin
 	return Y[fullIndex];
 };
 
-uint8_t Sobelv2::Sobel_operator(const int index, const int imgWidth, uint8_t * image)
+uint8_t Sobelv2::Sobelv2_operator(const int index, const int imgWidth, uint8_t * image)
 {
 	int x_weight = 0;
 	int y_weight = 0;
