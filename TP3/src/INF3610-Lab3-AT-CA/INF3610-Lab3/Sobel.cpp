@@ -77,6 +77,8 @@ void Sobel::thread(void)
 
 	while (true)
 	{
+		readAddress = 0;
+
 		// Lecture de l'image
 
 		imgWidth = read(readAddress);
@@ -110,8 +112,6 @@ void Sobel::thread(void)
 					write(position + readAddress, 0);
 				}
 				else {
-					// wait(48); // Valeur non arbitraire. A justifier
-
 					// Premier pixel
 					unsigned int pixel1 = 0;
 					if (j != 0) {	// A la premiere colonne, on met du blanc
@@ -126,7 +126,7 @@ void Sobel::thread(void)
 
 					// Quatrieme pixel
 					unsigned int pixel4 = 0;
-					if (j > imgWidth - 4) { // A la derniere colonne, on met du blanc
+					if (j < imgWidth - 4) { // A la derniere colonne, on met du blanc
 						pixel4 = sobel_operator(position + 3, imgWidth, image) << 24;
 					}
 

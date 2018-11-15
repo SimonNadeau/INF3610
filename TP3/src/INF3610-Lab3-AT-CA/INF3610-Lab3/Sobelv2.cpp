@@ -35,7 +35,7 @@ unsigned int Sobelv2::read(unsigned int readAddress) {
 	address.write(readAddress);
 	requestRead.write(true);
 
-	// Wait for rising edge clk
+	// Attendre signal pour lire
 	do {
 		wait(clk->posedge_event());
 	} while (!ackReaderWriter.read());
@@ -53,7 +53,7 @@ void Sobelv2::readCache(unsigned int readAddress, unsigned int* writeCacheAddres
 	length.write(readLength);
 	requestCache.write(true);
 
-	// Wait for rising edge clk
+	// Attendre signal pour lire
 	do {
 		wait(clk->posedge_event());
 	} while (!ackCache.read());
@@ -66,7 +66,7 @@ void Sobelv2::write(unsigned int writeAddress, unsigned int dataToWrite) {
 	dataRW.write(dataToWrite);
 	requestWrite.write(true);
 
-	// Wait for rising edge clk
+	// Attendre signal pour ecrire
 	do {
 		wait(clk->posedge_event());
 	} while (!ackReaderWriter.read());
@@ -88,46 +88,58 @@ void Sobelv2::thread(void)
 	unsigned int data = 0x00000000;
 	uint8_t* image = NULL;
 	uint8_t* cache = NULL;
-	unsigned int readAddress = 0;
 	unsigned int position = 0;
 
 	while (true) {
+		unsigned int readAddress = 0;
+
 		imgWidth = read(readAddress);
 		readAddress += 4;
 		imgHeight = read(readAddress);
 		readAddress += 4;
+		unsigned int prevBytes = readAddress;
 
-		cache = new uint8_t[4 * imgWidth]();
-		image = new uint8_t[imgHeight * imgWidth]();
+		unsigned int cacheSize = 4 * imgWidth;
+		cache = new uint8_t[cacheSize]();	// Tampon d'une taille de 4 lignes de l'image
+		image = new uint8_t[imgHeight * imgWidth]();	// On garde l'image en entier en memoire
 
+		// Premiere lecture pour remplir la cache
 		readCache(readAddress, (unsigned int*)cache, 3 * imgWidth);
 		readAddress += 3 * imgWidth;
 
+		// Alternance lecture - calcul de l'image
+
 		for (unsigned int i = 0; i < imgHeight; i++) {
+			// Lecture de la prochaine ligne de l'image
 			if (i != 0 && i != imgHeight - 1) {
-				readCache(readAddress, ((unsigned int*)cache) + ((readAddress - 8) % (4 * imgWidth) / 4), imgWidth);
+				unsigned int* writeCacheAddress = (unsigned int*)cache + (readAddress - prevBytes) % cacheSize / 4;
+				readCache(readAddress, writeCacheAddress, imgWidth);
 				readAddress += imgWidth;
 			}
+
+			// Calcul
+			unsigned int cacheIndex = 0;
 			for (unsigned int j = 0; j < imgWidth; j++) {
 				position = i * imgWidth + j;
+
+				// Sur la bordure, on met du blanc
 				if (i == 0 || j == 0 || i == imgHeight - 1 || j == imgWidth - 1) {
 					image[position] = 0;
 				}
 				else {
-					wait(12); // Non arbitraire. 
-					image[position] = Sobelv2_operator((readAddress - 8 - 3 * imgWidth) % (imgWidth * 4) + j, imgWidth, cache);
+					cacheIndex = (readAddress - prevBytes - 3 * imgWidth) % cacheSize + j;
+					image[position] = Sobelv2_operator(cacheIndex, imgWidth, cache);
 				}
 			}
 		}
 
+		// Ecriture de l'image
+
 		for (unsigned int i = 0; i < imgHeight; i++) {
 			for (unsigned int j = 0; j < imgWidth; j += 4) {
 				position = i * imgWidth + j;
-				write(8 + position, 
-					(image[position]) +
-					(image[position + 1] << 8) +
-					(image[position + 2] << 16) +
-					(image[position + 3] << 24));
+				data = image[position] + (image[position + 1] << 8) + (image[position + 2] << 16) +( image[position + 3] << 24);
+				write(prevBytes + position, data);
 			}
 		}
 
