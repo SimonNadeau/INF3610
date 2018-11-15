@@ -90,14 +90,15 @@ void Sobel::thread(void)
 		uint8_t * image = new uint8_t[imgSize]();
 
 		// Lecture de tous les pixels de l'image
+		unsigned int mask = 0x000000FF;
 		for (unsigned int i = 0; i < imgHeight; i++) {
 			for (unsigned int j = 0; j < imgWidth; j += 4) {
 				position = j + i * imgWidth;
 				data = read(position + readAddress);	// Les premiers octets ne correspondent pas a des pixels
-				image[position] = data & 0x000000FF;	// Read renvoie 4 octets, donc 4 pixels a la fois	
-				image[position + 1] = data & 0x0000FF00;
-				image[position + 2] = data & 0x00FF0000;
-				image[position + 3] = data & 0xFF000000;
+				image[position] = data & mask;	// Read renvoie 4 octets, donc 4 pixels a la fois	
+				image[position + 1] = (data >> 8) & mask;
+				image[position + 2] = (data >> 16) & mask;
+				image[position + 3] = data >> 24;
 			}
 		}
 		
