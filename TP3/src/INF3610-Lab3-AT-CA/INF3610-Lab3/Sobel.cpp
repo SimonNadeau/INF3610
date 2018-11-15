@@ -15,7 +15,7 @@ Sobel::Sobel( sc_module_name name ) : sc_module(name) /* À compléter */
 {
 	/* À compléter */
 	SC_THREAD(thread);
-	//sensitive << clk.pos;
+	sensitive << clk.pos();
 }
 
 
@@ -32,10 +32,11 @@ Sobel::~Sobel()
 // Exemple de synchronisation "Handshaking"
 unsigned int Sobel::read(unsigned int readAddress) {
 	unsigned int dataToRead = 0;
+
 	address.write(readAddress);
 	requestRead.write(true);
 
-	// Wait for rising edge clk
+	// Attendre signal pour lire
 	do {
 		wait(clk->posedge_event());
 	} while (!ack.read());
@@ -44,7 +45,6 @@ unsigned int Sobel::read(unsigned int readAddress) {
 	requestRead.write(false);
 
 	return dataToRead;
-
 }
 
 void Sobel::write(unsigned int writeAddress, unsigned int dataToWrite) {
@@ -52,7 +52,7 @@ void Sobel::write(unsigned int writeAddress, unsigned int dataToWrite) {
 	data.write(dataToWrite);
 	requestWrite.write(true);
 
-	// Wait for rising edge clk
+	// Attendre signal pour ecrire
 	do {
 		wait(clk->posedge_event());
 	} while (!ack.read());
@@ -71,64 +71,67 @@ void Sobel::thread(void)
 	/* À compléter */
 	unsigned int imgWidth = 0;
 	unsigned int imgHeight = 0;
-	unsigned int threadAddress = 0;
+	unsigned int readAddress = 0;
 	unsigned int data = 0x00000000;
-	unsigned int adress = 0;
+	unsigned int position = 0;
 
 	while (true)
 	{
 		// Lecture de l'image
 
-		imgWidth = read(threadAddress);
-		threadAddress += 4;
-		imgHeight = read(threadAddress);
+		imgWidth = read(readAddress);
+		readAddress += 4;
+		imgHeight = read(readAddress);
+		readAddress += 4;
 		unsigned int imgSize = imgWidth * imgHeight;
 
-		uint8_t * image = new uint8_t[imgSize];
+		uint8_t * image = new uint8_t[imgSize]();
 
+		// Lecture de tous les pixels de l'image
 		for (unsigned int i = 0; i < imgHeight; i++) {
 			for (unsigned int j = 0; j < imgWidth; j += 4) {
-				address = j + i*imgWidth;
-				data = read(address + 8);
-				image[address] = data & 0x000000FF;
-				image[address + 1] = data & 0x0000FF00;
-				image[address + 2] = data & 0x00FF0000;
-				image[address + 3] = data & 0xFF000000;
+				position = j + i * imgWidth;
+				data = read(position + readAddress);	// Les premiers octets ne correspondent pas a des pixels
+				image[position] = data & 0x000000FF;	// Read renvoie 4 octets, donc 4 pixels a la fois	
+				image[position + 1] = data & 0x0000FF00;
+				image[position + 2] = data & 0x00FF0000;
+				image[position + 3] = data & 0xFF000000;
 			}
 		}
 		
-		// Fin de la lecture
+		// Fin de la lecture, Debut de l'ecriture
 
 		for (unsigned int i = 0; i < imgHeight; i++) {
 			for (unsigned int j = 0; j < imgWidth; j += 4) {
-				// Si c'est sur le bord;
-				address = j + i * imgWidth;
+				position = j + i * imgWidth;
+				
+				// A la premiere et a la derniere rangee, on met du blanc
 				if (i == 0 || i == imgHeight - 1) {
-					write(8 + address, 0);
+					write(position + readAddress, 0);
 				}
 				else {
-					wait(48); // Valeur non arbitraire. A justifier
+					// wait(48); // Valeur non arbitraire. A justifier
 
-					// bits 0-7
-					unsigned int bits0to7 = 0;
-					if (j != 0) {
-						bits0to7 = sobel_operator(address, imgWidth, image);
+					// Premier pixel
+					unsigned int pixel1 = 0;
+					if (j != 0) {	// A la premiere colonne, on met du blanc
+						pixel1 = sobel_operator(position, imgWidth, image);
 					}
 
-					// bits 8-15
-					unsigned int bits8to15 = sobel_operator(address + 1, imgWidth, image) << 8;
+					// Deuxieme pixel
+					unsigned int pixel2 = sobel_operator(position + 1, imgWidth, image) << 8;
 
-					// bits 16-23
-					unsigned int bits16to23 = sobel_operator(address + 2, imgWidth, image) << 16;
+					// Troisieme pixel
+					unsigned int pixel3 = sobel_operator(position + 2, imgWidth, image) << 16;
 
-					// bits 24-31
-					unsigned int bits24to31 = 0;
-					if (j != imgWidth - 4) {
-						bits24to31 = sobel_operator(address + 3, imgWidth, image) << 24;
+					// Quatrieme pixel
+					unsigned int pixel4 = 0;
+					if (j > imgWidth - 4) { // A la derniere colonne, on met du blanc
+						pixel4 = sobel_operator(position + 3, imgWidth, image) << 24;
 					}
 
-					data = bits0to7 + bits8to15 + bits16to23 + bits24to31;
-					write(8 + address, data);
+					data = pixel1 + pixel2 + pixel3 + pixel4;
+					write(position + readAddress, data);
 				}
 			}
 		}

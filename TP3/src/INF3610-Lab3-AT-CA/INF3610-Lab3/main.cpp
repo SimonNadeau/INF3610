@@ -42,6 +42,9 @@ int sc_main(int arg_count, char **arg_value)
 	sc_signal<bool, SC_MANY_WRITERS> reqRead;
 	sc_signal<bool, SC_MANY_WRITERS> reqWrite;
 	sc_signal<bool, SC_MANY_WRITERS> ackReaderWriter;
+	sc_signal<bool, SC_MANY_WRITERS> ackCache;
+	sc_signal<bool, SC_MANY_WRITERS> reqCache;
+
 
 	/* à compléter*/
 
@@ -57,7 +60,7 @@ int sc_main(int arg_count, char **arg_value)
 	writer.clk(clk);
 	writer.data(data);
 	writer.address(address);
-	writer.request(reqRead);
+	writer.request(reqWrite);
 	writer.ack(ackReaderWriter);
 	writer.dataPortRAM(dataRAM);
 
@@ -79,10 +82,30 @@ int sc_main(int arg_count, char **arg_value)
 		sc_start(-1, sc_core::sc_time_unit(sim_units));
 		cout << endl << "Simulation s'est terminée à " << sc_time_stamp();
 	} else {
-		Sobelv2 sobel2("Sobel");
+		Sobelv2 sobel2("Sobelv2");
 		CacheMem cacheMem("CacheMem");
 
 		/* à compléter*/
+		sobel2.ackCache(ackCache);
+		sobel2.ackReaderWriter(ackReaderWriter);
+		sobel2.address(address);
+		sobel2.addressRes(addressData);
+		sobel2.clk(clk);
+		sobel2.dataRW(data);
+		sobel2.length(length);
+		sobel2.requestCache(reqCache);
+		sobel2.requestRead(reqRead);
+		sobel2.requestWrite(reqWrite);
+
+		cacheMem.ackFromReader(ackReaderWriter);
+		cacheMem.ackToCPU(ackCache);
+		cacheMem.address(address);
+		cacheMem.addressData(addressData);
+		cacheMem.clk(clk);
+		cacheMem.dataReader(data);
+		cacheMem.length(length);
+		cacheMem.requestFromCPU(reqCache);
+		cacheMem.requestToReader(reqRead);
 
 		// Démarrage de l'application
 		cout << "Démarrage de la simulation." << endl;

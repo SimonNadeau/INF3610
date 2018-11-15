@@ -39,16 +39,20 @@ void Writer::thread(void)
 	// Boucle infinie
 	while (1)
 	{
-		// Verify request port
+		// Attendre signal pour ecrire
 		do {
 			wait(clk->posedge_event());
 		} while (!request.read());
 
+		// Lecture de l'adresse et des donnees
 		uiAddress = address.read();
 		uiData = data.read();
-		dataPortRAM->Write(uiAddress, uiData);
-		ack.write(true);
 
+		// Ecriture dans le port de la ram
+		dataPortRAM->Write(uiAddress, uiData);
+		
+		// On ecrit dans le port jusqu'au prochain front montant de l'horloge
+		ack.write(true);
 		wait(clk->posedge_event());
 		ack.write(false);
 	}

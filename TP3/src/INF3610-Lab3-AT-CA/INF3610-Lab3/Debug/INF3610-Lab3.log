@@ -1,14 +1,2 @@
-﻿  assert.c
-  CacheMem.cpp
-  Sobel.cpp
-  Sobelv2.cpp
-  DataRAM.cpp
-  main.cpp
-  RAM.cpp
-  Reader.cpp
-  Writer.cpp
-c:\users\machaci\documents\inf3610\inf3610\tp3\src\inf3610-lab3-at-ca\inf3610-lab3\sobel.cpp(89): warning C4018: '<' : incompatibilité signed/unsigned
-c:\users\machaci\documents\inf3610\inf3610\tp3\src\inf3610-lab3-at-ca\inf3610-lab3\sobel.cpp(90): warning C4018: '<' : incompatibilité signed/unsigned
-c:\users\machaci\documents\inf3610\inf3610\tp3\src\inf3610-lab3-at-ca\inf3610-lab3\sobel.cpp(102): warning C4018: '<' : incompatibilité signed/unsigned
-c:\users\machaci\documents\inf3610\inf3610\tp3\src\inf3610-lab3-at-ca\inf3610-lab3\sobel.cpp(103): warning C4018: '<' : incompatibilité signed/unsigned
-LINK : fatal error LNK1104: impossible d'ouvrir le fichier 'SystemC.lib'
+﻿  Sobel.cpp
+  INF3610-Lab3.vcxproj -> C:\Users\snad9\OneDrive\Documents\Polytechnique\Cours\A18\INF3610\TP\INF3610\TP3\src\INF3610-Lab3-AT-CA\Debug\INF3610-Lab3-AT-CA.exe

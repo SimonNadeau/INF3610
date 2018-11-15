@@ -11,14 +11,11 @@
 //	Constructeur
 //
 ///////////////////////////////////////////////////////////////////////////////
-Sobelv2::Sobelv2( sc_module_name name )
+Sobelv2::Sobelv2( sc_module_name name ) : sc_module(name)
 /* À compléter */
 {
-	/*
-	
-	À compléter
-	
-	*/
+	SC_THREAD(thread);
+	sensitive << clk.pos();
 }
 
 
@@ -29,13 +26,53 @@ Sobelv2::Sobelv2( sc_module_name name )
 ///////////////////////////////////////////////////////////////////////////////
 Sobelv2::~Sobelv2()
 {
-	/*
-	
-	À compléter
-	
-	*/
+	// À compléter
 }
 
+// Exemple de synchronisation "Handshaking"
+unsigned int Sobelv2::read(unsigned int readAddress) {
+	unsigned int dataToRead = 0;
+	address.write(readAddress);
+	requestRead.write(true);
+
+	// Wait for rising edge clk
+	do {
+		wait(clk->posedge_event());
+	} while (!ackReaderWriter.read());
+
+	dataToRead = dataRW.read();
+	requestRead.write(false);
+
+	return dataToRead;
+
+}
+
+void Sobelv2::readCache(unsigned int readAddress, unsigned int* writeCacheAddress, unsigned int readLength) {
+	address.write(readAddress);
+	addressRes.write(writeCacheAddress);
+	length.write(readLength);
+	requestCache.write(true);
+
+	// Wait for rising edge clk
+	do {
+		wait(clk->posedge_event());
+	} while (!ackCache.read());
+
+	requestCache.write(false);
+}
+
+void Sobelv2::write(unsigned int writeAddress, unsigned int dataToWrite) {
+	address.write(writeAddress);
+	dataRW.write(dataToWrite);
+	requestWrite.write(true);
+
+	// Wait for rising edge clk
+	do {
+		wait(clk->posedge_event());
+	} while (!ackReaderWriter.read());
+
+	requestWrite.write(false);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -46,8 +83,58 @@ void Sobelv2::thread(void)
 {
 	/* À compléter */
 
-	int width = 0;
-	int height = 0;
+	unsigned int imgWidth = 0;
+	unsigned int imgHeight = 0;
+	unsigned int data = 0x00000000;
+	uint8_t* image = NULL;
+	uint8_t* cache = NULL;
+	unsigned int readAddress = 0;
+	unsigned int position = 0;
+
+	while (true) {
+		imgWidth = read(readAddress);
+		readAddress += 4;
+		imgHeight = read(readAddress);
+		readAddress += 4;
+
+		cache = new uint8_t[4 * imgWidth]();
+		image = new uint8_t[imgHeight * imgWidth]();
+
+		readCache(readAddress, (unsigned int*)cache, 3 * imgWidth);
+		readAddress += 3 * imgWidth;
+
+		for (unsigned int i = 0; i < imgHeight; i++) {
+			if (i != 0 && i != imgHeight - 1) {
+				readCache(readAddress, ((unsigned int*)cache) + ((readAddress - 8) % (4 * imgWidth) / 4), imgWidth);
+				readAddress += imgWidth;
+			}
+			for (unsigned int j = 0; j < imgWidth; j++) {
+				position = i * imgWidth + j;
+				if (i == 0 || j == 0 || i == imgHeight - 1 || j == imgWidth - 1) {
+					image[position] = 0;
+				}
+				else {
+					wait(12); // Non arbitraire. 
+					image[position] = Sobelv2_operator((readAddress - 8 - 3 * imgWidth) % (imgWidth * 4) + j, imgWidth, cache);
+				}
+			}
+		}
+
+		for (unsigned int i = 0; i < imgHeight; i++) {
+			for (unsigned int j = 0; j < imgWidth; j += 4) {
+				position = i * imgWidth + j;
+				write(8 + position, 
+					(image[position]) +
+					(image[position + 1] << 8) +
+					(image[position + 2] << 16) +
+					(image[position + 3] << 24));
+			}
+		}
+
+		delete[] cache;
+		delete[] image;
+		sc_stop();
+	}
 
 }
 
