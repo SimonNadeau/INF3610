@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<vivadoHLSLog:LogRoot xmlns:vivadoHLSLog="www.xilinx.com/vivadoHLSLog">
+  <errorLogs>
+    <logs>
+      <synLog/>
+      <simLog/>
+      <mgLog/>
+      <packageLog/>
+      <csimLog/>
+    </logs>
+  </errorLogs>
+  <warningLogs>
+    <logs>
+      <synLog>
+        <logs message="WARNING: [XFORM 203-542] the outer loop is not a perfect loop because there is nontrivial logic in the loop header." projectName="CrappyButFreeChromaResampler" solutionName="solution1" date="2017-11-01T11:36:22.067-0400" type="Warning"/>
+        <logs message="WARNING: [XFORM 203-542] Cannot flatten a loop nest 'inf' (CrappyButFreeChromaResampler/CrappyButFreeChromaResampler.cpp:32:18) in function 'CrappyButFreeChromaResampler' : " projectName="CrappyButFreeChromaResampler" solutionName="solution1" date="2017-11-01T11:36:21.860-0400" type="Warning"/>
+        <logs message="WARNING: [XFORM 203-561] 'inf' (CrappyButFreeChromaResampler/CrappyButFreeChromaResampler.cpp:32:18) in function 'CrappyButFreeChromaResampler' is an infinite loop." projectName="CrappyButFreeChromaResampler" solutionName="solution1" date="2017-11-01T11:36:21.855-0400" type="Warning"/>
+        <logs message="WARNING: [HLS 200-40] CrappyButFreeChromaResampler/CrappyButFreeChromaResampler.cpp:36:4: warning: 'auto' type specifier is a C++11 extension [-Wc++11-extensions]&#xD;&#xA;                        auto pixIn = video_in.read();&#xD;&#xA;                        ^&#xD;&#xA;1 warning generated." projectName="CrappyButFreeChromaResampler" solutionName="solution1" date="2017-11-01T11:36:17.438-0400" type="Warning"/>
+      </synLog>
+      <simLog/>
+      <mgLog/>
+      <packageLog/>
+      <csimLog/>
+    </logs>
+  </warningLogs>
+</vivadoHLSLog:LogRoot>
