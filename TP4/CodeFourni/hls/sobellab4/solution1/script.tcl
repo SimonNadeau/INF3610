@@ -12,7 +12,7 @@ open_solution "solution1"
 set_part {xc7z020clg484-1} -tool vivado
 create_clock -period 10 -name default
 #source "./sobellab4/solution1/directives.tcl"
-csim_design -O -compiler gcc
+csim_design -compiler gcc
 csynth_design
 cosim_design
 export_design -rtl verilog -format ip_catalog -description "Sobel" -vendor "polymtl.ca" -display_name "Sobel"

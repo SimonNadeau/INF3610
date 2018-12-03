@@ -26,13 +26,14 @@
 								<option id="gnu.cpp.compiler.exe.debug.option.debugging.level.661331326" name="Debug Level" superClass="gnu.cpp.compiler.exe.debug.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.include.paths.1431369671" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="C:/Logiciels/Xilinx/Vivado/2018.1/include/ap_sysc"/>
+									<listOptionValue builtIn="false" value="C:/Users/machaci/Documents/INF3610/TP4/CodeFourni/hls"/>
 									<listOptionValue builtIn="false" value="C:/Logiciels/Xilinx/Vivado/2018.1/include/etc"/>
 									<listOptionValue builtIn="false" value="C:/Logiciels/Xilinx/Vivado/2018.1/win64/tools/auto_cc/include"/>
 									<listOptionValue builtIn="false" value="C:/Logiciels/Xilinx/Vivado/2018.1/include"/>
 									<listOptionValue builtIn="false" value="C:/Logiciels/Xilinx/Vivado/2018.1/win64/tools/systemc/include"/>
-									<listOptionValue builtIn="false" value="C:/Users/machaci/Documents/INF3610/INF3610/TP4/CodeFourni/hls"/>
 									<listOptionValue builtIn="false" value="C:/dev/3610/4/foo/hls2"/>
 									<listOptionValue builtIn="false" value="/home/ff/dev/foo/hls2"/>
+									<listOptionValue builtIn="false" value="C:/Users/machaci/Documents/INF3610/INF3610/TP4/CodeFourni/hls"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.preprocessor.def.1617288659" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="AESL_TB"/>
@@ -46,13 +47,14 @@
 								<option id="gnu.c.compiler.exe.debug.option.debugging.level.1362697616" name="Debug Level" superClass="gnu.c.compiler.exe.debug.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.c.compiler.option.include.paths.246054516" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="C:/Logiciels/Xilinx/Vivado/2018.1/include/ap_sysc"/>
+									<listOptionValue builtIn="false" value="C:/Users/machaci/Documents/INF3610/TP4/CodeFourni/hls"/>
 									<listOptionValue builtIn="false" value="C:/Logiciels/Xilinx/Vivado/2018.1/include/etc"/>
 									<listOptionValue builtIn="false" value="C:/Logiciels/Xilinx/Vivado/2018.1/win64/tools/auto_cc/include"/>
 									<listOptionValue builtIn="false" value="C:/Logiciels/Xilinx/Vivado/2018.1/include"/>
 									<listOptionValue builtIn="false" value="C:/Logiciels/Xilinx/Vivado/2018.1/win64/tools/systemc/include"/>
-									<listOptionValue builtIn="false" value="C:/Users/machaci/Documents/INF3610/INF3610/TP4/CodeFourni/hls"/>
 									<listOptionValue builtIn="false" value="C:/dev/3610/4/foo/hls2"/>
 									<listOptionValue builtIn="false" value="/home/ff/dev/foo/hls2"/>
+									<listOptionValue builtIn="false" value="C:/Users/machaci/Documents/INF3610/INF3610/TP4/CodeFourni/hls"/>
 								</option>
 								<option id="gnu.c.compiler.option.preprocessor.def.symbols.1492725539" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="AESL_TB"/>
@@ -116,13 +118,14 @@
 								<option id="gnu.cpp.compiler.exe.release.option.debugging.level.638707190" name="Debug Level" superClass="gnu.cpp.compiler.exe.release.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.none" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.include.paths.21176113" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="C:/Logiciels/Xilinx/Vivado/2018.1/include/ap_sysc"/>
+									<listOptionValue builtIn="false" value="C:/Users/machaci/Documents/INF3610/TP4/CodeFourni/hls"/>
 									<listOptionValue builtIn="false" value="C:/Logiciels/Xilinx/Vivado/2018.1/include/etc"/>
 									<listOptionValue builtIn="false" value="C:/Logiciels/Xilinx/Vivado/2018.1/win64/tools/auto_cc/include"/>
 									<listOptionValue builtIn="false" value="C:/Logiciels/Xilinx/Vivado/2018.1/include"/>
 									<listOptionValue builtIn="false" value="C:/Logiciels/Xilinx/Vivado/2018.1/win64/tools/systemc/include"/>
-									<listOptionValue builtIn="false" value="C:/Users/machaci/Documents/INF3610/INF3610/TP4/CodeFourni/hls"/>
 									<listOptionValue builtIn="false" value="C:/dev/3610/4/foo/hls2"/>
 									<listOptionValue builtIn="false" value="/home/ff/dev/foo/hls2"/>
+									<listOptionValue builtIn="false" value="C:/Users/machaci/Documents/INF3610/INF3610/TP4/CodeFourni/hls"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.853554526" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
@@ -131,13 +134,14 @@
 								<option id="gnu.c.compiler.exe.release.option.debugging.level.206376004" name="Debug Level" superClass="gnu.c.compiler.exe.release.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.none" valueType="enumerated"/>
 								<option id="gnu.c.compiler.option.include.paths.43439160" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="C:/Logiciels/Xilinx/Vivado/2018.1/include/ap_sysc"/>
+									<listOptionValue builtIn="false" value="C:/Users/machaci/Documents/INF3610/TP4/CodeFourni/hls"/>
 									<listOptionValue builtIn="false" value="C:/Logiciels/Xilinx/Vivado/2018.1/include/etc"/>
 									<listOptionValue builtIn="false" value="C:/Logiciels/Xilinx/Vivado/2018.1/win64/tools/auto_cc/include"/>
 									<listOptionValue builtIn="false" value="C:/Logiciels/Xilinx/Vivado/2018.1/include"/>
 									<listOptionValue builtIn="false" value="C:/Logiciels/Xilinx/Vivado/2018.1/win64/tools/systemc/include"/>
-									<listOptionValue builtIn="false" value="C:/Users/machaci/Documents/INF3610/INF3610/TP4/CodeFourni/hls"/>
 									<listOptionValue builtIn="false" value="C:/dev/3610/4/foo/hls2"/>
 									<listOptionValue builtIn="false" value="/home/ff/dev/foo/hls2"/>
+									<listOptionValue builtIn="false" value="C:/Users/machaci/Documents/INF3610/INF3610/TP4/CodeFourni/hls"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1633942401" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>

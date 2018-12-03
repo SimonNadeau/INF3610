@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <autopilotfilemapping:AutoPilotFileMapping xmlns:autopilotfilemapping="www.autoesl.com/autopilotfilemapping">
   <source>
-    <originFiles name="Sobel.cpp" path="C:\Users\machaci\Documents\INF3610\INF3610\TP4\CodeFourni\hls\SobelLab4\Sobel.cpp"/>
+    <originFiles name="Sobel.cpp" path="C:\Users\machaci\Documents\INF3610\TP4\CodeFourni\hls\SobelLab4\Sobel.cpp"/>
   </source>
   <testbench>
-    <originFiles name="sobel_test.cpp" path="C:\Users\machaci\Documents\INF3610\INF3610\TP4\CodeFourni\hls\sobellab4\sobel_test.cpp"/>
-    <originFiles name="ap_bmp.cpp" path="C:\Users\machaci\Documents\INF3610\INF3610\TP4\CodeFourni\hls\sobellab4\ap_bmp.cpp"/>
+    <originFiles name="sobel_test.cpp" path="C:\Users\machaci\Documents\INF3610\TP4\CodeFourni\hls\sobellab4\sobel_test.cpp"/>
+    <originFiles name="ap_bmp.cpp" path="C:\Users\machaci\Documents\INF3610\TP4\CodeFourni\hls\sobellab4\ap_bmp.cpp"/>
   </testbench>
 </autopilotfilemapping:AutoPilotFileMapping>

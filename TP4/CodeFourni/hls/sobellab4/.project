@@ -29,47 +29,47 @@
 		<link>
 			<name>source</name>
 			<type>2</type>
-			<location>C:/Users/machaci/Documents/INF3610/INF3610/TP4/CodeFourni/hls/sobellab4/.apc/.src</location>
+			<location>C:/Users/machaci/Documents/INF3610/TP4/CodeFourni/hls/sobellab4/.apc/.src</location>
 		</link>
 		<link>
 			<name>testbench</name>
 			<type>2</type>
-			<location>C:/Users/machaci/Documents/INF3610/INF3610/TP4/CodeFourni/hls/sobellab4/.apc/.tb</location>
+			<location>C:/Users/machaci/Documents/INF3610/TP4/CodeFourni/hls/sobellab4/.apc/.tb</location>
 		</link>
 		<link>
 			<name>solution1/constraints</name>
 			<type>2</type>
-			<location>C:/Users/machaci/Documents/INF3610/INF3610/TP4/CodeFourni/hls/sobellab4/solution1/.tcls</location>
+			<location>C:/Users/machaci/Documents/INF3610/TP4/CodeFourni/hls/sobellab4/solution1/.tcls</location>
 		</link>
 		<link>
 			<name>source/Sobel.cpp</name>
 			<type>1</type>
-			<location>C:/Users/machaci/Documents/INF3610/INF3610/TP4/CodeFourni/hls/SobelLab4/Sobel.cpp</location>
+			<location>C:/Users/machaci/Documents/INF3610/TP4/CodeFourni/hls/SobelLab4/Sobel.cpp</location>
 		</link>
 		<link>
 			<name>testbench/ap_bmp.cpp</name>
 			<type>1</type>
-			<location>C:/Users/machaci/Documents/INF3610/INF3610/TP4/CodeFourni/hls/sobellab4/ap_bmp.cpp</location>
+			<location>C:/Users/machaci/Documents/INF3610/TP4/CodeFourni/hls/sobellab4/ap_bmp.cpp</location>
 		</link>
 		<link>
 			<name>testbench/sobel_test.cpp</name>
 			<type>1</type>
-			<location>C:/Users/machaci/Documents/INF3610/INF3610/TP4/CodeFourni/hls/sobellab4/sobel_test.cpp</location>
+			<location>C:/Users/machaci/Documents/INF3610/TP4/CodeFourni/hls/sobellab4/sobel_test.cpp</location>
 		</link>
 		<link>
 			<name>solution1/constraints/.xml.directive</name>
 			<type>1</type>
-			<location>C:/Users/machaci/Documents/INF3610/INF3610/TP4/CodeFourni/hls/sobellab4/solution1/solution1.directive</location>
+			<location>C:/Users/machaci/Documents/INF3610/TP4/CodeFourni/hls/sobellab4/solution1/solution1.directive</location>
 		</link>
 		<link>
 			<name>solution1/constraints/directives.tcl</name>
 			<type>1</type>
-			<location>C:/Users/machaci/Documents/INF3610/INF3610/TP4/CodeFourni/hls/sobellab4/solution1/directives.tcl</location>
+			<location>C:/Users/machaci/Documents/INF3610/TP4/CodeFourni/hls/sobellab4/solution1/directives.tcl</location>
 		</link>
 		<link>
 			<name>solution1/constraints/script.tcl</name>
 			<type>1</type>
-			<location>C:/Users/machaci/Documents/INF3610/INF3610/TP4/CodeFourni/hls/sobellab4/solution1/script.tcl</location>
+			<location>C:/Users/machaci/Documents/INF3610/TP4/CodeFourni/hls/sobellab4/solution1/script.tcl</location>
 		</link>
 	</linkedResources>
 </projectDescription>
